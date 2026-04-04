@@ -332,8 +332,9 @@ async function handleNyukai(body, env) {
       メールアドレス: guardian["メールアドレス"] ?? "",
       郵便番号: guardian["郵便番号"] ?? "",
       住所: guardian["住所"] ?? "",
-      "支払い方法": guardian["支払い方法"] ?? "",
+      "支払い方法": "新入会",
       口座名義人: guardian["口座名義人"] ?? "",
+      教室名: student?.["教室名"] ?? "", // 所属組織のルックアップキー
     });
 
     await kintonePost(APP.SEIKYUU, guardianRecord, env.TOKEN_SEIKYUU);
