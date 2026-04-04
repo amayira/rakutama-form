@@ -13,6 +13,7 @@ const APP = {
 
 const ALLOWED_ORIGINS = [
   "https://form.rakutama-tokyo.com",
+  "http://form.rakutama-tokyo.com",   // SSL証明書取得前の暫定許可
   "https://amayira.github.io",
 ];
 
