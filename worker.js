@@ -263,6 +263,8 @@ async function handleKesseki(body, env) {
     名: body["名"] ?? "",
     欠席日: body["欠席日"] ?? "",
     振替受講期日: body["振替受講期日"] ?? "",
+    振替受講日: body["振替受講日"] ?? "",
+    時刻: body["時刻"] ?? "",
     備考: body["備考"] ?? "",
   });
 
