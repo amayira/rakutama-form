@@ -91,6 +91,33 @@ async function kintoneGetById(appId, recordId, token) {
   return data; // { record: { ... } }
 }
 
+// ─── 採番ヘルパー ─────────────────────────────────────────────────────────────
+
+/**
+ * kintoneアプリの指定フィールドから現在の最大連番を取得し、次のIDを返す
+ * @param {number} appId - kintone App ID
+ * @param {string} fieldCode - 採番対象フィールドコード（例: "請求先ID"）
+ * @param {string} prefix - プレフィックス（例: "P"）
+ * @param {string} separator - 接続語（例: "-"）
+ * @param {number} digits - 桁数（例: 4）
+ * @param {string} token - APIトークン
+ */
+async function generateNextId(appId, fieldCode, prefix, separator, digits, token) {
+  const query = `order by ${fieldCode} desc limit 1`;
+  const data = await kintoneGet(appId, query, token);
+  let nextNum = 1;
+  if (data.records && data.records.length > 0) {
+    const lastId = data.records[0][fieldCode]?.value ?? "";
+    // P-0001 → 1, S-00001 → 1
+    const match = lastId.match(/(\d+)$/);
+    if (match) {
+      nextNum = parseInt(match[1], 10) + 1;
+    }
+  }
+  const paddedNum = String(nextNum).padStart(digits, "0");
+  return `${prefix}${separator}${paddedNum}`;
+}
+
 // ─── CORS helpers ────────────────────────────────────────────────────────────
 
 function corsHeaders(origin) {
@@ -291,7 +318,13 @@ async function handleNyukai(body, env) {
       };
     }
 
+    // Worker側で採番: P- + 4桁ゼロ埋め
+    billingId = await generateNextId(
+      APP.SEIKYUU, "請求先ID", "P", "-", 4, env.TOKEN_SEIKYUU
+    );
+
     const guardianRecord = buildRecord({
+      請求先ID: billingId,
       保護者名: guardian["保護者名"] ?? "",
       フリガナ: guardian["フリガナ"] ?? "",
       電話番号1: guardian["電話番号1"] ?? "",
@@ -303,28 +336,7 @@ async function handleNyukai(body, env) {
       口座名義人: guardian["口座名義人"] ?? "",
     });
 
-    const postResult = await kintonePost(
-      APP.SEIKYUU,
-      guardianRecord,
-      env.TOKEN_SEIKYUU
-    );
-
-    // postResult.id is the internal record ID ($id); we need the
-    // auto-generated 請求先ID field value, so we fetch the record.
-    const getResult = await kintoneGetById(
-      APP.SEIKYUU,
-      postResult.id,
-      env.TOKEN_SEIKYUU
-    );
-    billingId = getResult.record["請求先ID"]?.value ?? "";
-
-    if (!billingId) {
-      return {
-        success: false,
-        error: "請求先IDを取得できませんでした",
-        status: 500,
-      };
-    }
+    await kintonePost(APP.SEIKYUU, guardianRecord, env.TOKEN_SEIKYUU);
   }
 
   // ── Create 生徒名簿 record ──────────────────────────────────────────────────
@@ -332,7 +344,13 @@ async function handleNyukai(body, env) {
     return { success: false, error: "生徒情報が不足しています", status: 400 };
   }
 
+  // Worker側で採番: S- + 5桁ゼロ埋め
+  const studentId = await generateNextId(
+    APP.SEITO, "生徒番号", "S", "-", 5, env.TOKEN_SEITO
+  );
+
   const studentRecord = buildRecord({
+    生徒番号: studentId,
     氏: student["氏"] ?? "",
     名: student["名"] ?? "",
     フリガナ: student["フリガナ"] ?? "",
