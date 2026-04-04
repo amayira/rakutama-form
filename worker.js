@@ -383,6 +383,7 @@ async function handleNyukai(body, env, origin) {
     学校名: student["学校名"] ?? "",
     学年: student["学年"] ?? "",
     教室名: student["教室名"] ?? "",
+    初回授業日: student["初回授業日"] ?? "",
     請求先ID: billingId,
     // 月謝ID はルックアップ型（月謝マスタ参照）
     月謝ID: student["gakuhiId"] ?? "",
@@ -402,8 +403,8 @@ async function handleNyukai(body, env, origin) {
     })),
   };
 
-  // 請求先ID（請求先マスタ）・教室名（教室マスタ）・月謝ID（月謝マスタ）のルックアップ用にマルチトークン
-  const seitoToken = [env.TOKEN_SEITO, env.TOKEN_SEIKYUU, env.TOKEN_KYOSHITSU, env.TOKEN_GAKUHI]
+  // 請求先ID（請求先マスタ）・教室名（教室マスタ）・月謝ID（月謝マスタ）・授業ID（授業マスタ）のルックアップ用にマルチトークン
+  const seitoToken = [env.TOKEN_SEITO, env.TOKEN_SEIKYUU, env.TOKEN_KYOSHITSU, env.TOKEN_GAKUHI, env.TOKEN_JUGYO]
     .filter(Boolean).join(",");
   await kintonePost(APP.SEITO, studentRecord, seitoToken);
 
