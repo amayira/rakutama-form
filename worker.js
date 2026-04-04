@@ -417,7 +417,7 @@ async function handleJugyo(params, env) {
     return { success: false, error: "classroom は必須です", status: 400 };
   }
 
-  const query = `教室名 = "${classroom}" and 開講状況 = "開講中" order by 曜日 asc, 開始時刻 asc limit 100`;
+  const query = `教室名 = "${classroom}" and 開講状況 in ("開講中") order by 曜日 asc, 開始時刻 asc limit 100`;
   const data = await kintoneGet(APP.JUGYO, query, env.TOKEN_JUGYO);
 
   const classes = (data.records ?? []).map((rec) => ({
