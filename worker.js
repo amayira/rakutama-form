@@ -21,7 +21,7 @@ const ALLOWED_ORIGINS = [
 // 関西版を追加する際はここにドメインとコードを追記する
 const DOMAIN_ORG_MAP = {
   "form.rakutama-tokyo.com":   "アルファーブレイン",
-  "form.rakutama-soroban.com": "アルファーブレイン",  // ← 関西版のコードに要変更
+  "form.rakutama-soroban.com": "本部",
   "amayira.github.io":         "アルファーブレイン",  // 開発用
 };
 
