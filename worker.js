@@ -4,13 +4,14 @@
 const KINTONE_BASE = "https://o81m0gfyv532.cybozu.com";
 
 const APP = {
-  SEITO: 8,       // 生徒名簿
-  SEIKYUU: 9,     // 請求先マスタ
-  JUGYO: 6,       // 授業マスタ
-  GAKUHI: 10,     // 月謝マスタ
-  KENTEI: 12,     // 検定申込
-  FURIKAE: 14,    // 振替管理
-  TAIKEN: 17,     // 体験参加名簿
+  SEITO: 8,        // 生徒名簿
+  SEIKYUU: 9,      // 請求先マスタ
+  JUGYO: 6,        // 授業マスタ
+  GAKUHI: 10,      // 月謝マスタ
+  KENTEI: 12,      // 検定申込
+  FURIKAE: 14,     // 振替管理
+  TAIKEN: 17,      // 体験参加名簿
+  CLASS_CHANGE: 18, // クラス変更
 };
 
 const ALLOWED_ORIGINS = [
@@ -470,13 +471,7 @@ async function handleGakuhi(params, env) {
  * Gracefully no-ops if CLASS_CHANGE_APP_ID is not configured.
  */
 async function handleClassChange(body, env) {
-  const appId = env.CLASS_CHANGE_APP_ID;
-  const token = env.TOKEN_CLASS_CHANGE;
-
-  if (!appId) {
-    // App not yet created — return success with a note so forms don't break.
-    return { success: true, note: "app_not_configured" };
-  }
+  const token = [env.TOKEN_CLASS_CHANGE, env.TOKEN_SEITO].filter(Boolean).join(",");
 
   const record = buildRecord({
     生徒番号: body["生徒番号"] ?? "",
@@ -490,7 +485,7 @@ async function handleClassChange(body, env) {
     備考: body["備考"] ?? "",
   });
 
-  await kintonePost(Number(appId), record, token);
+  await kintonePost(APP.CLASS_CHANGE, record, token);
   return { success: true };
 }
 
