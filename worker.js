@@ -268,7 +268,8 @@ async function handleKesseki(body, env) {
     備考: body["備考"] ?? "",
   });
 
-  await kintonePost(APP.FURIKAE, record, env.TOKEN_FURIKAE);
+  const furikaeToken = [env.TOKEN_FURIKAE, env.TOKEN_SEITO].filter(Boolean).join(",");
+  await kintonePost(APP.FURIKAE, record, furikaeToken);
   return { success: true };
 }
 
