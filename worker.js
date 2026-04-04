@@ -166,6 +166,13 @@ async function handleLookup(body, env) {
  * Creates a record in 体験参加名簿 (App 17).
  */
 async function handleTaiken(body, env) {
+  // 教室名はルックアップ型のため直接セットせず、備考に「希望教室：〇〇校」として保存
+  const classroom = body["教室名"] ?? "";
+  const userNotes = body["備考"] ?? "";
+  const combinedNotes = classroom
+    ? `【希望教室】${classroom}\n${userNotes}`.trim()
+    : userNotes;
+
   const record = buildRecord({
     氏: body["氏"] ?? "",
     名: body["名"] ?? "",
@@ -176,9 +183,8 @@ async function handleTaiken(body, env) {
     住所: body["住所"] ?? "",
     そろばん経験: body["そろばん経験"] ?? "",
     "級・段": body["級・段"] ?? "",
-    教室名: body["教室名"] ?? "",
     希望日時: body["希望日時"] ?? "",
-    備考: body["備考"] ?? "",
+    備考: combinedNotes,
   });
 
   await kintonePost(APP.TAIKEN, record, env.TOKEN_TAIKEN);

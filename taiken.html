@@ -301,13 +301,12 @@
             教室名: classroom,
             希望日時: preferredDatetime,
             備考: notes,
-            ステータス: '問い合わせ受付',
           }),
         });
 
         if (!response.ok) {
           const data = await response.json().catch(() => ({}));
-          throw new Error(data.message || `送信に失敗しました（${response.status}）`);
+          throw new Error(data.error || data.message || `送信に失敗しました（${response.status}）`);
         }
 
         document.getElementById('form-card').classList.add('hidden');
