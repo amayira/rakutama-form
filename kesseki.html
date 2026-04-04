@@ -35,7 +35,7 @@
   <!-- Sticky Header -->
   <header class="sticky top-0 z-50 bg-white shadow-sm">
     <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-      <a href="index.html">
+      <a href="https://rakutama-tokyo.com/index.html">
         <img src="https://rakutama-tokyo.com/Pictures/title.png" alt="楽珠そろばん教室" class="h-10 object-contain" />
       </a>
       <span class="hidden md:block text-sm font-medium text-gray-600">楽珠そろばん教室 各種申込フォーム</span>
@@ -54,7 +54,7 @@
     <div id="form-card" class="bg-white rounded-2xl shadow-md p-6 md:p-8">
       <div class="mb-6">
         <h1 class="text-xl font-black text-gray-800 font-display mb-2">欠席・振替 連絡フォーム</h1>
-        <p class="text-sm text-gray-500">欠席・振替のご連絡はこちらから。生徒番号でお名前・教室名を自動入力できます。</p>
+        <p class="text-sm text-gray-500">欠席・振替のご連絡はこちらから。生徒番号で教室・受講クラスを確認できます。</p>
       </div>
 
       <!-- Error Box -->
@@ -64,7 +64,7 @@
       <div class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
         <label class="block text-sm font-medium text-gray-700 mb-2">生徒番号</label>
         <div class="flex gap-2">
-          <input type="text" id="student-number" placeholder="例：12345"
+          <input type="text" id="student-number" placeholder="例：S-00001"
             class="flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
           <button type="button" id="lookup-btn"
             class="flex-shrink-0 border-2 border-green-500 text-green-600 font-bold text-sm px-4 py-2 rounded-lg hover:bg-green-50 transition font-display flex items-center gap-2">
@@ -76,18 +76,18 @@
 
         <!-- Student Info Card (shown after successful lookup) -->
         <div id="student-info" class="hidden mt-3 bg-white border border-green-200 rounded-lg p-3">
-          <div class="flex items-center gap-2 mb-1">
+          <div class="flex items-center gap-2 mb-2">
             <i class="fa-solid fa-circle-check text-green-500 text-sm"></i>
             <span class="text-xs font-bold text-green-600">生徒情報が見つかりました</span>
           </div>
-          <div class="grid grid-cols-2 gap-2 mt-2">
-            <div class="bg-gray-50 rounded-lg p-2">
-              <div class="text-xs text-gray-400 mb-0.5">氏名</div>
-              <div id="info-name" class="text-sm font-medium text-gray-800"></div>
-            </div>
+          <div class="grid grid-cols-2 gap-2">
             <div class="bg-gray-50 rounded-lg p-2">
               <div class="text-xs text-gray-400 mb-0.5">教室名</div>
               <div id="info-classroom" class="text-sm font-medium text-gray-800"></div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-2">
+              <div class="text-xs text-gray-400 mb-0.5">受講中クラス</div>
+              <div id="info-jugyo" class="text-sm font-medium text-gray-800"></div>
             </div>
           </div>
         </div>
@@ -203,9 +203,10 @@
 
         const data = await response.json();
         studentData = data;
+        const s = data.student;
 
-        document.getElementById('info-name').textContent = `${data.familyName} ${data.givenName}`;
-        document.getElementById('info-classroom').textContent = data.classroom;
+        document.getElementById('info-classroom').textContent = s.classroom || '―';
+        document.getElementById('info-jugyo').textContent = s.jugyoIds && s.jugyoIds.length > 0 ? s.jugyoIds.join('、') : '―';
         studentInfo.classList.remove('hidden');
         document.getElementById('submit-btn').disabled = false;
         document.getElementById('submit-hint').classList.add('hidden');
@@ -253,6 +254,7 @@
         return;
       }
 
+      const s = studentData.student;
       const submitBtn = document.getElementById('submit-btn');
       const submitText = document.getElementById('submit-text');
       const submitSpinner = document.getElementById('submit-spinner');
@@ -266,10 +268,10 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             生徒番号: studentNumber,
-            請求ID: studentData.billingId,
-            教室名: studentData.classroom,
-            氏: studentData.familyName,
-            名: studentData.givenName,
+            請求ID: s.billingId,
+            教室名: s.classroom,
+            氏: s.familyName,
+            名: s.givenName,
             欠席日: absenceDate,
             振替受講期日: substituteDeadline,
             備考: notes,
