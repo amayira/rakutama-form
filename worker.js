@@ -11,7 +11,10 @@ const APP = {
   TAIKEN: 17,     // 体験参加名簿
 };
 
-const ALLOWED_ORIGIN = "https://form.rakutama-tokyo.com";
+const ALLOWED_ORIGINS = [
+  "https://form.rakutama-tokyo.com",
+  "https://amayira.github.io",
+];
 
 // ─── kintone helpers ────────────────────────────────────────────────────────
 
@@ -87,10 +90,9 @@ async function kintoneGetById(appId, recordId, token) {
 // ─── CORS helpers ────────────────────────────────────────────────────────────
 
 function corsHeaders(origin) {
-  // Only allow the production origin; for any other origin we still set the
-  // header to the allowed origin so the browser blocks it.
-  const allowedOrigin =
-    origin === ALLOWED_ORIGIN ? ALLOWED_ORIGIN : ALLOWED_ORIGIN;
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin)
+    ? origin
+    : ALLOWED_ORIGINS[0];
   return {
     "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
