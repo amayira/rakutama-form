@@ -294,7 +294,8 @@ async function handleKentei(body, env) {
   if (body["珠算受験級"]) fields["珠算受験級"] = body["珠算受験級"];
 
   const record = buildRecord(fields);
-  await kintonePost(APP.KENTEI, record, env.TOKEN_KENTEI);
+  const kenteiToken = [env.TOKEN_KENTEI, env.TOKEN_SEITO].filter(Boolean).join(",");
+  await kintonePost(APP.KENTEI, record, kenteiToken);
   return { success: true };
 }
 
