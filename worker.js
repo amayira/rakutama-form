@@ -179,7 +179,6 @@ async function handleTaiken(body, env) {
     教室名: body["教室名"] ?? "",
     希望日時: body["希望日時"] ?? "",
     備考: body["備考"] ?? "",
-    ステータス: "問い合わせ受付",
   });
 
   await kintonePost(APP.TAIKEN, record, env.TOKEN_TAIKEN);
