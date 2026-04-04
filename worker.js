@@ -6,6 +6,8 @@ const KINTONE_BASE = "https://o81m0gfyv532.cybozu.com";
 const APP = {
   SEITO: 8,       // 生徒名簿
   SEIKYUU: 9,     // 請求先マスタ
+  JUGYO: 6,       // 授業マスタ
+  GAKUHI: 10,     // 月謝マスタ
   KENTEI: 12,     // 検定申込
   FURIKAE: 14,    // 振替管理
   TAIKEN: 17,     // 体験参加名簿
@@ -382,14 +384,69 @@ async function handleNyukai(body, env, origin) {
     学年: student["学年"] ?? "",
     教室名: student["教室名"] ?? "",
     請求先ID: billingId,
+    // 月謝ID はルックアップ型（月謝マスタ参照）
+    月謝ID: student["gakuhiId"] ?? "",
   });
 
-  // 請求先ID（請求先マスタ）・教室名（教室マスタ）のルックアップ用にマルチトークン
-  const seitoToken = [env.TOKEN_SEITO, env.TOKEN_SEIKYUU, env.TOKEN_KYOSHITSU]
+  // 受講テーブル はサブテーブル型 — buildRecord では対応できないため直接セット
+  studentRecord["受講テーブル"] = {
+    value: student["jugyoId"] ? [{
+      value: {
+        授業ID: { value: student["jugyoId"] },
+        受講開始日: { value: new Date().toISOString().split("T")[0] },
+        状態: { value: "受講中" },
+      },
+    }] : [],
+  };
+
+  // 請求先ID（請求先マスタ）・教室名（教室マスタ）・月謝ID（月謝マスタ）のルックアップ用にマルチトークン
+  const seitoToken = [env.TOKEN_SEITO, env.TOKEN_SEIKYUU, env.TOKEN_KYOSHITSU, env.TOKEN_GAKUHI]
     .filter(Boolean).join(",");
   await kintonePost(APP.SEITO, studentRecord, seitoToken);
 
   return { success: true };
+}
+
+/**
+ * GET /api/jugyo?classroom=教室名
+ * Returns list of active classes for the given classroom from 授業マスタ (App 6).
+ */
+async function handleJugyo(params, env) {
+  const classroom = params.get("classroom");
+  if (!classroom) {
+    return { success: false, error: "classroom は必須です", status: 400 };
+  }
+
+  const query = `教室名 = "${classroom}" and 開講状況 = "開講中" order by 曜日 asc, 開始時刻 asc limit 100`;
+  const data = await kintoneGet(APP.JUGYO, query, env.TOKEN_JUGYO);
+
+  const classes = (data.records ?? []).map((rec) => ({
+    id: rec["授業ID"]?.value ?? "",
+    name: rec["授業名"]?.value ?? "",
+  }));
+
+  return { success: true, classes };
+}
+
+/**
+ * GET /api/gakuhi?orgCode=所属組織コード
+ * Returns list of fee courses for the given org from 月謝マスタ (App 10).
+ */
+async function handleGakuhi(params, env) {
+  const orgCode = params.get("orgCode");
+  if (!orgCode) {
+    return { success: false, error: "orgCode は必須です", status: 400 };
+  }
+
+  const query = `所属組織 in ("${orgCode}") order by コース名 asc limit 100`;
+  const data = await kintoneGet(APP.GAKUHI, query, env.TOKEN_GAKUHI);
+
+  const fees = (data.records ?? []).map((rec) => ({
+    id: rec["月謝ID"]?.value ?? "",
+    name: rec["コース名"]?.value ?? "",
+  }));
+
+  return { success: true, fees };
 }
 
 /**
@@ -438,7 +495,29 @@ export default {
       });
     }
 
-    // ── Only POST for API routes ─────────────────────────────────────────────
+    // ── GET routes (query-param based) ──────────────────────────────────────
+    if (request.method === "GET") {
+      const params = url.searchParams;
+      let result;
+      try {
+        if (path === "/api/jugyo") {
+          result = await handleJugyo(params, env);
+        } else if (path === "/api/gakuhi") {
+          result = await handleGakuhi(params, env);
+        } else {
+          return errorResponse("Not Found", 404, origin);
+        }
+      } catch (err) {
+        console.error("Worker error:", err);
+        return errorResponse(err.message || "サーバーエラーが発生しました", 500, origin);
+      }
+      if (result.success === false) {
+        return jsonResponse({ success: false, error: result.error }, result.status ?? 400, origin);
+      }
+      return jsonResponse(result, 200, origin);
+    }
+
+    // ── Only POST for remaining API routes ───────────────────────────────────
     if (request.method !== "POST") {
       return errorResponse("Method Not Allowed", 405, origin);
     }

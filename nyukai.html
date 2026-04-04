@@ -215,6 +215,43 @@
           </div>
         </div>
 
+        <!-- Section: クラス・月謝 -->
+        <div class="mb-8">
+          <div class="mb-4">
+            <span class="text-xs font-black border-2 border-[#4A96AE] text-[#4A96AE] rounded-full px-4 py-1 font-display">クラス・月謝</span>
+          </div>
+
+          <!-- 希望クラス -->
+          <div class="mb-4" id="jugyo-section" style="display:none">
+            <label class="block text-sm font-medium text-gray-700 mb-1">希望クラス <span class="text-red-500">*</span></label>
+            <div class="relative">
+              <select id="jugyo-select"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 bg-white">
+                <option value="">クラスを選択してください</option>
+              </select>
+              <span id="jugyo-spinner" class="hidden ml-2 absolute right-8 top-3 text-gray-400 text-xs">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+              </span>
+            </div>
+            <p id="jugyo-error" class="hidden mt-1 text-xs text-red-500"></p>
+          </div>
+
+          <!-- 月謝コース -->
+          <div class="mb-4" id="gakuhi-section" style="display:none">
+            <label class="block text-sm font-medium text-gray-700 mb-1">月謝コース <span class="text-red-500">*</span><span class="text-gray-400 text-xs font-normal ml-1">（週何コマ受けるかによって異なります）</span></label>
+            <div class="relative">
+              <select id="gakuhi-select"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 bg-white">
+                <option value="">月謝コースを選択してください</option>
+              </select>
+              <span id="gakuhi-spinner" class="hidden ml-2 absolute right-8 top-3 text-gray-400 text-xs">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+              </span>
+            </div>
+            <p id="gakuhi-error" class="hidden mt-1 text-xs text-red-500"></p>
+          </div>
+        </div>
+
         <!-- Submit Button -->
         <button type="submit" id="submit-btn"
           class="w-full bg-green-500 hover:bg-green-600 text-white font-black text-base py-3 rounded-full shadow-md transition font-display flex items-center justify-center gap-2">
@@ -249,7 +286,14 @@
 
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // Toggle 級・段 field
+    // ── orgCode: determined by current domain ────────────────────────────────
+    const DOMAIN_ORG_MAP = {
+      'form.rakutama-tokyo.com':   'アルファーブレイン',
+      'form.rakutama-soroban.com': '本部',
+    };
+    const orgCode = DOMAIN_ORG_MAP[window.location.hostname] ?? 'アルファーブレイン';
+
+    // ── Toggle 級・段 field ──────────────────────────────────────────────────
     document.querySelectorAll('input[name="experience"]').forEach(radio => {
       radio.addEventListener('change', () => {
         const levelField = document.getElementById('level-field');
@@ -257,7 +301,100 @@
       });
     });
 
-    // Form submission
+    // ── 希望教室 → fetch jugyo list ──────────────────────────────────────────
+    document.getElementById('classroom').addEventListener('change', async function () {
+      const classroom = this.value;
+      const jugyoSection = document.getElementById('jugyo-section');
+      const jugyoSelect = document.getElementById('jugyo-select');
+      const jugyoSpinner = document.getElementById('jugyo-spinner');
+      const jugyoError = document.getElementById('jugyo-error');
+      const gakuhiSection = document.getElementById('gakuhi-section');
+      const gakuhiSelect = document.getElementById('gakuhi-select');
+
+      // Reset downstream
+      jugyoSelect.innerHTML = '<option value="">クラスを選択してください</option>';
+      gakuhiSelect.innerHTML = '<option value="">月謝コースを選択してください</option>';
+      gakuhiSection.style.display = 'none';
+      jugyoError.classList.add('hidden');
+      jugyoError.textContent = '';
+
+      if (!classroom) {
+        jugyoSection.style.display = 'none';
+        return;
+      }
+
+      jugyoSection.style.display = '';
+      jugyoSpinner.classList.remove('hidden');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/jugyo?classroom=${encodeURIComponent(classroom)}`);
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'クラスの取得に失敗しました');
+
+        if (data.classes.length === 0) {
+          jugyoError.textContent = 'この教室には開講中のクラスがありません。';
+          jugyoError.classList.remove('hidden');
+        } else {
+          data.classes.forEach(cls => {
+            const opt = document.createElement('option');
+            opt.value = cls.id;
+            opt.textContent = cls.name;
+            jugyoSelect.appendChild(opt);
+          });
+        }
+      } catch (err) {
+        jugyoError.textContent = err.message || 'クラス情報の取得中にエラーが発生しました。';
+        jugyoError.classList.remove('hidden');
+      } finally {
+        jugyoSpinner.classList.add('hidden');
+      }
+    });
+
+    // ── 希望クラス → fetch gakuhi list ──────────────────────────────────────
+    document.getElementById('jugyo-select').addEventListener('change', async function () {
+      const jugyoId = this.value;
+      const gakuhiSection = document.getElementById('gakuhi-section');
+      const gakuhiSelect = document.getElementById('gakuhi-select');
+      const gakuhiSpinner = document.getElementById('gakuhi-spinner');
+      const gakuhiError = document.getElementById('gakuhi-error');
+
+      gakuhiSelect.innerHTML = '<option value="">月謝コースを選択してください</option>';
+      gakuhiError.classList.add('hidden');
+      gakuhiError.textContent = '';
+
+      if (!jugyoId) {
+        gakuhiSection.style.display = 'none';
+        return;
+      }
+
+      gakuhiSection.style.display = '';
+      gakuhiSpinner.classList.remove('hidden');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/gakuhi?orgCode=${encodeURIComponent(orgCode)}`);
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || '月謝情報の取得に失敗しました');
+
+        if (data.fees.length === 0) {
+          gakuhiError.textContent = '月謝コースが見つかりませんでした。';
+          gakuhiError.classList.remove('hidden');
+        } else {
+          data.fees.forEach(fee => {
+            const opt = document.createElement('option');
+            opt.value = fee.id;
+            opt.textContent = fee.name;
+            gakuhiSelect.appendChild(opt);
+          });
+        }
+      } catch (err) {
+        gakuhiError.textContent = err.message || '月謝情報の取得中にエラーが発生しました。';
+        gakuhiError.classList.remove('hidden');
+      } finally {
+        gakuhiSpinner.classList.add('hidden');
+      }
+    });
+
+    // ── Form submission ──────────────────────────────────────────────────────
     document.getElementById('nyukai-form').addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -278,6 +415,8 @@
       const email = document.getElementById('email').value.trim();
       const address = document.getElementById('address').value.trim();
       const classroom = document.getElementById('classroom').value;
+      const jugyoId = document.getElementById('jugyo-select').value;
+      const gakuhiId = document.getElementById('gakuhi-select').value;
       const desiredStart = document.getElementById('desired-start').value.trim();
       const notes = document.getElementById('notes').value.trim();
 
@@ -292,6 +431,8 @@
       if (!email) errors.push('メールアドレスをご入力ください');
       if (!address) errors.push('住所をご入力ください');
       if (!classroom) errors.push('希望教室を選択してください');
+      if (!jugyoId) errors.push('希望クラスを選択してください');
+      if (!gakuhiId) errors.push('月謝コースを選択してください');
 
       if (errors.length > 0) {
         errorBox.innerHTML = errors.join('<br />');
@@ -312,28 +453,34 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            氏: familyName,
-            名: givenName,
-            フリガナ: furigana,
-            生年月日: birthdate,
-            学年: grade,
-            そろばん経験: experience,
-            '級・段': levelIfAny,
-            保護者氏: parentFamilyName,
-            保護者名: parentGivenName,
-            電話番号: tel,
-            メールアドレス: email,
-            住所: address,
-            教室名: classroom,
-            入会希望時期: desiredStart,
-            備考: notes,
-            ステータス: '問い合わせ受付',
+            isSibling: false,
+            guardian: {
+              保護者名: `${parentFamilyName}　${parentGivenName}`,
+              フリガナ: '',
+              電話番号1: tel,
+              電話番号2: '',
+              メールアドレス: email,
+              郵便番号: '',
+              住所: address,
+              口座名義人: '',
+            },
+            student: {
+              氏: familyName,
+              名: givenName,
+              フリガナ: furigana,
+              生年月日: birthdate,
+              学校名: '',
+              学年: grade,
+              教室名: classroom,
+              jugyoId,
+              gakuhiId,
+            },
           }),
         });
 
-        if (!response.ok) {
-          const data = await response.json().catch(() => ({}));
-          throw new Error(data.message || `送信に失敗しました（${response.status}）`);
+        const resData = await response.json().catch(() => ({}));
+        if (!response.ok || resData.success === false) {
+          throw new Error(resData.error || `送信に失敗しました（${response.status}）`);
         }
 
         document.getElementById('form-card').classList.add('hidden');
