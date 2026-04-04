@@ -384,8 +384,9 @@ async function handleNyukai(body, env, origin) {
     請求先ID: billingId,
   });
 
-  // 請求先IDはルックアップ型のため TOKEN_SEITO + TOKEN_SEIKYUU のマルチトークンで送信
-  const seitoToken = `${env.TOKEN_SEITO},${env.TOKEN_SEIKYUU}`;
+  // 請求先ID（請求先マスタ）・教室名（教室マスタ）のルックアップ用にマルチトークン
+  const seitoToken = [env.TOKEN_SEITO, env.TOKEN_SEIKYUU, env.TOKEN_KYOSHITSU]
+    .filter(Boolean).join(",");
   await kintonePost(APP.SEITO, studentRecord, seitoToken);
 
   return { success: true };
