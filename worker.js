@@ -388,15 +388,18 @@ async function handleNyukai(body, env, origin) {
     月謝ID: student["gakuhiId"] ?? "",
   });
 
-  // 受講テーブル はサブテーブル型 — buildRecord では対応できないため直接セット
+  // 受講テーブル はサブテーブル型 — 複数クラス選択に対応（jugyoIds は配列）
+  const today = new Date().toISOString().split("T")[0];
+  const jugyoIds = Array.isArray(student["jugyoIds"]) ? student["jugyoIds"]
+    : student["jugyoId"] ? [student["jugyoId"]] : [];
   studentRecord["受講テーブル"] = {
-    value: student["jugyoId"] ? [{
+    value: jugyoIds.map(id => ({
       value: {
-        授業ID: { value: student["jugyoId"] },
-        受講開始日: { value: new Date().toISOString().split("T")[0] },
+        授業ID: { value: id },
+        受講開始日: { value: today },
         状態: { value: "受講中" },
       },
-    }] : [],
+    })),
   };
 
   // 請求先ID（請求先マスタ）・教室名（教室マスタ）・月謝ID（月謝マスタ）のルックアップ用にマルチトークン
