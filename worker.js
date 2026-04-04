@@ -134,8 +134,16 @@ async function generateNextId(appId, fieldCode, prefix, separator, digits, token
       nextNum = parseInt(match[1], 10) + 1;
     }
   }
-  const paddedNum = String(nextNum).padStart(digits, "0");
-  return `${prefix}${separator}${paddedNum}`;
+  // 生成したIDが既存レコードと重複していないか確認し、重複なら採番し直す
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const candidate = `${prefix}${separator}${String(nextNum).padStart(digits, "0")}`;
+    const check = await kintoneGet(appId, `${fieldCode} = "${candidate}" limit 1`, token);
+    if (!check.records || check.records.length === 0) {
+      return candidate;
+    }
+    nextNum++;
+  }
+  throw new Error(`採番に失敗しました（${prefix}）`);
 }
 
 // ─── CORS helpers ────────────────────────────────────────────────────────────
