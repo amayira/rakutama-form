@@ -43,8 +43,11 @@ async function kintonePost(appId, record, token) {
   });
   const data = await res.json();
   if (!res.ok) {
+    const detail = data.errors
+      ? " / " + Object.entries(data.errors).map(([k,v]) => `${k}: ${v.messages?.join(",")}`).join(" | ")
+      : "";
     throw new Error(
-      `kintone POST app=${appId} failed: ${data.message || res.status}`
+      `kintone POST app=${appId} failed: ${data.message || res.status}${detail}`
     );
   }
   return data; // { id: "123", revision: "1" }
