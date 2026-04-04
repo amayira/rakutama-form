@@ -17,6 +17,24 @@ const ALLOWED_ORIGINS = [
   "https://amayira.github.io",
 ];
 
+// ドメインごとの所属組織コード（kintoneシステム管理→組織のコード）
+// 関西版を追加する際はここにドメインとコードを追記する
+const DOMAIN_ORG_MAP = {
+  "form.rakutama-tokyo.com":   "アルファーブレイン",
+  "form.rakutama-soroban.com": "アルファーブレイン",  // ← 関西版のコードに要変更
+  "amayira.github.io":         "アルファーブレイン",  // 開発用
+};
+
+/** Originヘッダーからホスト名を抽出して組織コードを返す */
+function getOrgCode(origin) {
+  try {
+    const host = new URL(origin).host;
+    return DOMAIN_ORG_MAP[host] ?? "alphabrain";
+  } catch {
+    return "alphabrain";
+  }
+}
+
 // ─── kintone helpers ────────────────────────────────────────────────────────
 
 /**
@@ -273,8 +291,9 @@ async function handleKentei(body, env) {
  *   2. If isSibling=false → create 請求先マスタ record → get auto-generated 請求先ID.
  *   3. Create 生徒名簿 record with student data + 請求先ID.
  */
-async function handleNyukai(body, env) {
+async function handleNyukai(body, env, origin) {
   const { isSibling, siblingStudentId, guardian, student } = body;
+  const orgCode = getOrgCode(origin);
 
   let billingId;
 
@@ -323,19 +342,22 @@ async function handleNyukai(body, env) {
       APP.SEIKYUU, "請求先ID", "P", "-", 4, env.TOKEN_SEIKYUU
     );
 
-    const guardianRecord = buildRecord({
-      請求先ID: billingId,
-      保護者名: guardian["保護者名"] ?? "",
-      フリガナ: guardian["フリガナ"] ?? "",
-      電話番号1: guardian["電話番号1"] ?? "",
-      電話番号2: guardian["電話番号2"] ?? "",
-      メールアドレス: guardian["メールアドレス"] ?? "",
-      郵便番号: guardian["郵便番号"] ?? "",
-      住所: guardian["住所"] ?? "",
-      "支払い方法": "新入会",
-      口座名義人: guardian["口座名義人"] ?? "",
-      教室名: student?.["教室名"] ?? "", // 所属組織のルックアップキー
-    });
+    const guardianRecord = {
+      ...buildRecord({
+        請求先ID: billingId,
+        保護者名: guardian["保護者名"] ?? "",
+        フリガナ: guardian["フリガナ"] ?? "",
+        電話番号1: guardian["電話番号1"] ?? "",
+        電話番号2: guardian["電話番号2"] ?? "",
+        メールアドレス: guardian["メールアドレス"] ?? "",
+        郵便番号: guardian["郵便番号"] ?? "",
+        住所: guardian["住所"] ?? "",
+        "支払い方法": "新入会",
+        口座名義人: guardian["口座名義人"] ?? "",
+      }),
+      // 組織選択型は特殊形式 { value: [{ code: "..." }] }
+      所属組織: { value: [{ code: orgCode }] },
+    };
 
     await kintonePost(APP.SEIKYUU, guardianRecord, env.TOKEN_SEIKYUU);
   }
@@ -442,7 +464,7 @@ export default {
           result = await handleKentei(body, env);
           break;
         case "/api/nyukai":
-          result = await handleNyukai(body, env);
+          result = await handleNyukai(body, env, origin);
           break;
         case "/api/class-change":
           result = await handleClassChange(body, env);
