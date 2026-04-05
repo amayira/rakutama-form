@@ -181,6 +181,15 @@
             </select>
           </div>
 
+          <!-- 開講クラス一覧 -->
+          <div id="schedule-section" class="hidden mb-4">
+            <div class="text-xs font-medium text-gray-500 mb-2">この教室の開講クラス</div>
+            <div id="schedule-spinner" class="hidden text-sm text-gray-400 flex items-center gap-2 py-1">
+              <i class="fa-solid fa-spinner fa-spin"></i> 読み込み中...
+            </div>
+            <div id="schedule-list" class="flex flex-wrap gap-2"></div>
+          </div>
+
           <!-- 希望日時 -->
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">希望日時 <span class="text-red-500">*</span></label>
@@ -230,6 +239,40 @@
   <script>
     const API_BASE = 'https://rakutama-kintone.k-ariyama.workers.dev';
 
+
+    // 希望教室 → 開講クラス一覧を取得して表示
+    document.getElementById('classroom').addEventListener('change', async function () {
+      const classroom = this.value;
+      const section = document.getElementById('schedule-section');
+      const spinner = document.getElementById('schedule-spinner');
+      const list = document.getElementById('schedule-list');
+
+      list.innerHTML = '';
+      section.classList.add('hidden');
+      if (!classroom) return;
+
+      section.classList.remove('hidden');
+      spinner.classList.remove('hidden');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/jugyo?classroom=${encodeURIComponent(classroom)}`);
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error();
+        data.classes.forEach(cls => {
+          const badge = document.createElement('span');
+          badge.className = 'inline-block bg-blue-50 border border-blue-200 text-blue-700 text-xs font-medium rounded-full px-3 py-1';
+          badge.textContent = cls.name;
+          list.appendChild(badge);
+        });
+        if (data.classes.length === 0) {
+          list.innerHTML = '<span class="text-xs text-gray-400">開講中のクラスが見つかりませんでした</span>';
+        }
+      } catch {
+        list.innerHTML = '<span class="text-xs text-red-400">クラス情報の取得に失敗しました</span>';
+      } finally {
+        spinner.classList.add('hidden');
+      }
+    });
 
     // Toggle 級・段 field
     document.querySelectorAll('input[name="experience"]').forEach(radio => {
