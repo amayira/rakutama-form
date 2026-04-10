@@ -369,6 +369,7 @@ async function handleNyukai(body, env, origin) {
         住所: guardian["住所"] ?? "",
         "支払い方法": "新入会",
         口座名義人: guardian["口座名義人"] ?? "",
+        備考: guardian["クーポンコード"] ? `クーポンコード：${guardian["クーポンコード"]}` : "",
       }),
       // 組織選択型は特殊形式 { value: [{ code: "..." }] }
       所属組織: { value: [{ code: orgCode }] },
