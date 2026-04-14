@@ -326,8 +326,9 @@ async function handleNyukai(body, env, origin) {
   const jugyoIds = Array.isArray(student["jugyoIds"]) ? student["jugyoIds"]
     : student["jugyoId"] ? [student["jugyoId"]] : [];
   const toKoma = (id) => {
-    const m = String(id).match(/([月火水木金土日])(\d{2})\d{2}$/);
-    return m ? `${m[1]}${m[2]}` : id;
+    // "中村校-月1600" → "月16"、"早宮校-火1700" → "火17"
+    const m = String(id).match(/([月火水木金土日])(\d{2})/);
+    return m ? `${m[1]}${m[2]}` : String(id);
   };
 
   // ── app 19 にレコード登録 ──────────────────────────────────────────────────
