@@ -322,8 +322,13 @@ async function handleNyukai(body, env, origin) {
   const tempStudentId = `要修正&${rand5}`;
 
   // ── jugyoIds → コマ1〜コマ4 にマッピング ───────────────────────────────────
+  // 授業ID例: "早宮校-火1700" → "火17" ([曜日][hh]形式)
   const jugyoIds = Array.isArray(student["jugyoIds"]) ? student["jugyoIds"]
     : student["jugyoId"] ? [student["jugyoId"]] : [];
+  const toKoma = (id) => {
+    const m = String(id).match(/([月火水木金土日])(\d{2})\d{2}$/);
+    return m ? `${m[1]}${m[2]}` : id;
+  };
 
   // ── app 19 にレコード登録 ──────────────────────────────────────────────────
   const g = guardian ?? {};
@@ -339,10 +344,10 @@ async function handleNyukai(body, env, origin) {
     学年: student["学年"] ?? "",
     教室名: student["教室名"] ?? "",
     初回授業日: student["初回授業日"] ?? "",
-    コマ1: jugyoIds[0] ?? "",
-    コマ2: jugyoIds[1] ?? "",
-    コマ3: jugyoIds[2] ?? "",
-    コマ4: jugyoIds[3] ?? "",
+    コマ1: jugyoIds[0] ? toKoma(jugyoIds[0]) : "",
+    コマ2: jugyoIds[1] ? toKoma(jugyoIds[1]) : "",
+    コマ3: jugyoIds[2] ? toKoma(jugyoIds[2]) : "",
+    コマ4: jugyoIds[3] ? toKoma(jugyoIds[3]) : "",
     コース名: student["gakuhiName"] ?? "",
     保護者名: g["保護者名"] ?? "",
     電話番号1: g["電話番号1"] ?? "",
