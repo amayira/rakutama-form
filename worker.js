@@ -357,7 +357,7 @@ async function handleNyukai(body, env, origin) {
   // 所属組織フィールド（組織選択型）
   record["所属組織"] = { value: [{ code: orgCode }] };
 
-  const token = [env.TOKEN_SEITO_NEW, env.TOKEN_KYOSHITSU]
+  const token = [env.TOKEN_SEITO_NEW, env.TOKEN_KYOSHITSU, env.TOKEN_GAKUHI]
     .filter(Boolean).join(",");
   await kintonePost(APP.SEITO_NEW, record, token);
 
