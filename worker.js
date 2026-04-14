@@ -191,7 +191,7 @@ async function handleLookup(body, env) {
   }
 
   const query = `生徒番号 = "${studentNumber}"`;
-  const data = await kintoneGet(APP.SEITO, query, env.TOKEN_SEITO);
+  const data = await kintoneGet(APP.SEITO_NEW, query, env.TOKEN_SEITO_NEW);
 
   if (!data.records || data.records.length === 0) {
     return { success: false, error: "生徒番号が見つかりません", status: 404 };
@@ -199,18 +199,10 @@ async function handleLookup(body, env) {
 
   const rec = data.records[0];
 
-  // Extract subtable rows where 状態 = "受講中"
-  const jugyoIds = [];
-  const subtable = rec["受講テーブル"]?.value;
-  if (Array.isArray(subtable)) {
-    for (const row of subtable) {
-      const rowFields = row.value;
-      if (rowFields["状態"]?.value === "受講中") {
-        const jugyoId = rowFields["授業ID"]?.value;
-        if (jugyoId) jugyoIds.push(jugyoId);
-      }
-    }
-  }
+  // App 19 stores classes in コマ1〜コマ4 fields (no subtable)
+  const jugyoIds = ["コマ1", "コマ2", "コマ3", "コマ4"]
+    .map(f => rec[f]?.value)
+    .filter(v => v && v.trim() !== "");
 
   return {
     success: true,
@@ -218,7 +210,7 @@ async function handleLookup(body, env) {
       familyName: rec["氏"]?.value ?? "",
       givenName: rec["名"]?.value ?? "",
       classroom: rec["教室名"]?.value ?? "",
-      billingId: rec["請求先ID"]?.value ?? "",
+      billingId: rec["請求先ID"]?.value ?? rec["請求ID"]?.value ?? "",
       jugyoIds,
     },
   };
@@ -272,7 +264,7 @@ async function handleKesseki(body, env) {
     備考: body["備考"] ?? "",
   });
 
-  const furikaeToken = [env.TOKEN_FURIKAE, env.TOKEN_SEITO].filter(Boolean).join(",");
+  const furikaeToken = [env.TOKEN_FURIKAE, env.TOKEN_SEITO_NEW].filter(Boolean).join(",");
   await kintonePost(APP.FURIKAE, record, furikaeToken);
   return { success: true };
 }
@@ -297,7 +289,7 @@ async function handleKentei(body, env) {
   if (body["珠算受験級"]) fields["珠算受験級"] = body["珠算受験級"];
 
   const record = buildRecord(fields);
-  const kenteiToken = [env.TOKEN_KENTEI, env.TOKEN_SEITO].filter(Boolean).join(",");
+  const kenteiToken = [env.TOKEN_KENTEI, env.TOKEN_SEITO_NEW].filter(Boolean).join(",");
   await kintonePost(APP.KENTEI, record, kenteiToken);
   return { success: true };
 }
@@ -418,7 +410,7 @@ async function handleGakuhi(params, env) {
  * Gracefully no-ops if CLASS_CHANGE_APP_ID is not configured.
  */
 async function handleClassChange(body, env) {
-  const token = [env.TOKEN_CLASS_CHANGE, env.TOKEN_SEITO].filter(Boolean).join(",");
+  const token = [env.TOKEN_CLASS_CHANGE, env.TOKEN_SEITO_NEW].filter(Boolean).join(",");
 
   const record = buildRecord({
     生徒番号: body["生徒番号"] ?? "",

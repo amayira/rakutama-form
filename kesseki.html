@@ -59,7 +59,7 @@
       <div class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
         <label class="block text-sm font-medium text-gray-700 mb-2">生徒番号</label>
         <div class="flex gap-2">
-          <input type="text" id="student-number" placeholder="例：S-00001"
+          <input type="text" id="student-number" placeholder="例：A0000"
             class="min-w-0 flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
           <button type="button" id="lookup-btn"
             class="flex-shrink-0 border-2 border-green-500 text-green-600 font-bold text-sm px-4 py-2 rounded-lg hover:bg-green-50 transition font-display flex items-center gap-2">
@@ -104,7 +104,7 @@
           <div class="mb-4 bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 flex items-center gap-3">
             <i class="fa-solid fa-calendar-check text-blue-400 text-sm"></i>
             <div>
-              <div class="text-xs text-blue-500 font-medium">振替希望期限（自動設定）</div>
+              <div class="text-xs text-blue-500 font-medium">振替取得期限（自動設定）</div>
               <div id="deadline-display" class="text-sm font-bold text-blue-700"></div>
             </div>
           </div>
@@ -173,13 +173,23 @@
     const API_BASE = 'https://rakutama-kintone.k-ariyama.workers.dev';
 
 
-    // 振替希望期限：翌月末を自動計算して表示
-    const now = new Date();
-    const lastDayOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 2, 0);
-    const substituteDeadline = lastDayOfNextMonth.toISOString().split('T')[0];
-    const m = lastDayOfNextMonth.getMonth() + 1;
-    const d = lastDayOfNextMonth.getDate();
-    document.getElementById('deadline-display').textContent = `${lastDayOfNextMonth.getFullYear()}年${m}月${d}日`;
+    // 振替取得期限：EOMONTH(欠席日, 1) = 欠席日の翌月末を動的計算
+    let substituteDeadline = '';
+    function updateDeadline(dateValue) {
+      if (!dateValue) {
+        document.getElementById('deadline-display').textContent = '欠席日を選択すると自動表示されます';
+        substituteDeadline = '';
+        return;
+      }
+      const absence = new Date(dateValue + 'T00:00:00');
+      const eomonth = new Date(absence.getFullYear(), absence.getMonth() + 2, 0);
+      substituteDeadline = eomonth.toISOString().split('T')[0];
+      const m = eomonth.getMonth() + 1;
+      const d = eomonth.getDate();
+      document.getElementById('deadline-display').textContent = `${eomonth.getFullYear()}年${m}月${d}日`;
+    }
+    document.getElementById('absence-date').addEventListener('change', (e) => updateDeadline(e.target.value));
+    updateDeadline('');
 
     let studentData = null;
 
