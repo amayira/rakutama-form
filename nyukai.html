@@ -430,7 +430,9 @@
       const classroom = document.getElementById('classroom').value;
       const jugyoChecked = [...document.querySelectorAll('input[name="jugyo"]:checked')];
       const jugyoIds = jugyoChecked.map(cb => cb.value);
-      const gakuhiId = document.getElementById('gakuhi-select').value;
+      const gakuhiSelect = document.getElementById('gakuhi-select');
+      const gakuhiId = gakuhiSelect.value;
+      const gakuhiName = gakuhiSelect.options[gakuhiSelect.selectedIndex]?.text ?? "";
       const firstLessonDate = document.getElementById('first-lesson-date').value;
       const couponCode = document.getElementById('coupon-code').value.trim();
       const notes = document.getElementById('notes').value.trim();
@@ -491,6 +493,7 @@
               初回授業日: firstLessonDate,
               jugyoIds,
               gakuhiId,
+              gakuhiName,
             },
           }),
         });

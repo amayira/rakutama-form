@@ -4,18 +4,20 @@
 const KINTONE_BASE = "https://o81m0gfyv532.cybozu.com";
 
 const APP = {
-  SEITO: 8,        // 生徒名簿
-  SEIKYUU: 9,      // 請求先マスタ
+  SEITO: 8,        // 生徒名簿（旧）
+  SEIKYUU: 9,      // 請求先マスタ（旧）
   JUGYO: 6,        // 授業マスタ
   GAKUHI: 10,      // 月謝マスタ
   KENTEI: 12,      // 検定申込
   FURIKAE: 14,     // 振替管理
   TAIKEN: 17,      // 体験参加名簿
   CLASS_CHANGE: 18, // クラス変更
+  SEITO_NEW: 19,   // 生徒名簿（新・統合）
 };
 
 const ALLOWED_ORIGINS = [
   "https://form.rakutama-tokyo.com",
+  "https://rakutama-tokyo.com",
   "https://form.rakutama-soroban.com",
   "https://amayira.github.io",
 ];
@@ -24,6 +26,7 @@ const ALLOWED_ORIGINS = [
 // 関西版を追加する際はここにドメインとコードを追記する
 const DOMAIN_ORG_MAP = {
   "form.rakutama-tokyo.com":   "アルファーブレイン",
+  "rakutama-tokyo.com":        "アルファーブレイン",
   "form.rakutama-soroban.com": "本部",
   "amayira.github.io":         "アルファーブレイン",  // 開発用
 };
@@ -301,95 +304,33 @@ async function handleKentei(body, env) {
 
 /**
  * POST /api/nyukai
- * Enrollment flow:
- *   1. If isSibling=true → look up existing 請求先ID from sibling record.
- *   2. If isSibling=false → create 請求先マスタ record → get auto-generated 請求先ID.
- *   3. Create 生徒名簿 record with student data + 請求先ID.
+ * Enrollment flow (app 19 のみ):
+ *   1. If isSibling=true → look up existing 請求ID from sibling record (app 8 旧データ参照).
+ *   2. Create one record in 生徒名簿新 (App 19) with all student + guardian fields.
+ *   生徒番号 は「要修正&{5桁乱数}」で仮登録し、後で手動修正。
  */
 async function handleNyukai(body, env, origin) {
-  const { isSibling, siblingStudentId, guardian, student } = body;
+  const { guardian, student } = body;
   const orgCode = getOrgCode(origin);
 
-  let billingId;
-
-  if (isSibling) {
-    // ── Sibling path: reuse existing billing record ──────────────────────────
-    if (!siblingStudentId) {
-      return {
-        success: false,
-        error: "在籍中のお子様の生徒番号を入力してください",
-        status: 400,
-      };
-    }
-
-    const query = `生徒番号 = "${siblingStudentId}"`;
-    const data = await kintoneGet(APP.SEITO, query, env.TOKEN_SEITO);
-
-    if (!data.records || data.records.length === 0) {
-      return {
-        success: false,
-        error: "在籍中のお子様の生徒番号が見つかりません",
-        status: 404,
-      };
-    }
-
-    billingId = data.records[0]["請求先ID"]?.value ?? "";
-
-    if (!billingId) {
-      return {
-        success: false,
-        error: "既存生徒の請求先IDを取得できませんでした",
-        status: 500,
-      };
-    }
-  } else {
-    // ── New guardian: create 請求先マスタ record ─────────────────────────────
-    if (!guardian) {
-      return {
-        success: false,
-        error: "保護者情報が不足しています",
-        status: 400,
-      };
-    }
-
-    // Worker側で採番: P- + 4桁ゼロ埋め
-    billingId = await generateNextId(
-      APP.SEIKYUU, "請求先ID", "P", "-", 4, env.TOKEN_SEIKYUU
-    );
-
-    const guardianRecord = {
-      ...buildRecord({
-        請求先ID: billingId,
-        保護者名: guardian["保護者名"] ?? "",
-        フリガナ: guardian["フリガナ"] ?? "",
-        電話番号1: guardian["電話番号1"] ?? "",
-        電話番号2: guardian["電話番号2"] ?? "",
-        メールアドレス: guardian["メールアドレス"] ?? "",
-        郵便番号: guardian["郵便番号"] ?? "",
-        住所: guardian["住所"] ?? "",
-        "支払い方法": "新入会",
-        口座名義人: guardian["口座名義人"] ?? "",
-        備考: guardian["クーポンコード"] ? `クーポンコード：${guardian["クーポンコード"]}` : "",
-      }),
-      // 組織選択型は特殊形式 { value: [{ code: "..." }] }
-      所属組織: { value: [{ code: orgCode }] },
-    };
-
-    await kintonePost(APP.SEIKYUU, guardianRecord, env.TOKEN_SEIKYUU);
-  }
-
-  // ── Create 生徒名簿 record ──────────────────────────────────────────────────
   if (!student) {
     return { success: false, error: "生徒情報が不足しています", status: 400 };
   }
 
-  // Worker側で採番: S- + 5桁ゼロ埋め
-  const studentId = await generateNextId(
-    APP.SEITO, "生徒番号", "S", "-", 5, env.TOKEN_SEITO
-  );
+  // ── 生徒番号: 「要修正&{5桁乱数}」で仮登録 ─────────────────────────────────
+  const rand5 = String(Math.floor(Math.random() * 100000)).padStart(5, "0");
+  const tempStudentId = `要修正&${rand5}`;
 
-  const studentRecord = buildRecord({
-    生徒番号: studentId,
+  // ── jugyoIds → コマ1〜コマ4 にマッピング ───────────────────────────────────
+  const jugyoIds = Array.isArray(student["jugyoIds"]) ? student["jugyoIds"]
+    : student["jugyoId"] ? [student["jugyoId"]] : [];
+
+  // ── app 19 にレコード登録 ──────────────────────────────────────────────────
+  const g = guardian ?? {};
+  const coupon = g["クーポンコード"] ?? "";
+
+  const record = buildRecord({
+    生徒番号: tempStudentId,
     氏: student["氏"] ?? "",
     名: student["名"] ?? "",
     フリガナ: student["フリガナ"] ?? "",
@@ -398,29 +339,27 @@ async function handleNyukai(body, env, origin) {
     学年: student["学年"] ?? "",
     教室名: student["教室名"] ?? "",
     初回授業日: student["初回授業日"] ?? "",
-    請求先ID: billingId,
-    // 月謝ID はルックアップ型（月謝マスタ参照）
-    月謝ID: student["gakuhiId"] ?? "",
+    コマ1: jugyoIds[0] ?? "",
+    コマ2: jugyoIds[1] ?? "",
+    コマ3: jugyoIds[2] ?? "",
+    コマ4: jugyoIds[3] ?? "",
+    コース名: student["gakuhiName"] ?? "",
+    保護者名: g["保護者名"] ?? "",
+    電話番号1: g["電話番号1"] ?? "",
+    電話番号2: g["電話番号2"] ?? "",
+    メールアドレス: g["メールアドレス"] ?? "",
+    郵便番号: g["郵便番号"] ?? "",
+    住所: g["住所"] ?? "",
+    口座名義人: g["口座名義人"] ?? "",
+    備考: coupon ? `クーポンコード：${coupon}` : "",
   });
 
-  // 受講テーブル はサブテーブル型 — 複数クラス選択に対応（jugyoIds は配列）
-  const today = new Date().toISOString().split("T")[0];
-  const jugyoIds = Array.isArray(student["jugyoIds"]) ? student["jugyoIds"]
-    : student["jugyoId"] ? [student["jugyoId"]] : [];
-  studentRecord["受講テーブル"] = {
-    value: jugyoIds.map(id => ({
-      value: {
-        授業ID: { value: id },
-        受講開始日: { value: today },
-        状態: { value: "受講中" },
-      },
-    })),
-  };
+  // 所属組織フィールド（組織選択型）
+  record["所属組織"] = { value: [{ code: orgCode }] };
 
-  // 請求先ID（請求先マスタ）・教室名（教室マスタ）・月謝ID（月謝マスタ）・授業ID（授業マスタ）のルックアップ用にマルチトークン
-  const seitoToken = [env.TOKEN_SEITO, env.TOKEN_SEIKYUU, env.TOKEN_KYOSHITSU, env.TOKEN_GAKUHI, env.TOKEN_JUGYO]
+  const token = [env.TOKEN_SEITO_NEW, env.TOKEN_KYOSHITSU]
     .filter(Boolean).join(",");
-  await kintonePost(APP.SEITO, studentRecord, seitoToken);
+  await kintonePost(APP.SEITO_NEW, record, token);
 
   return { success: true };
 }
