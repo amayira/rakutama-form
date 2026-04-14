@@ -86,15 +86,15 @@
 
           <!-- フリガナ -->
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">フリガナ</label>
-            <input type="text" id="furigana" placeholder="カタカナでご入力ください"
+            <label class="block text-sm font-medium text-gray-700 mb-1">フリガナ <span class="text-red-500">*</span></label>
+            <input type="text" id="furigana" placeholder="カタカナでご入力ください" required
               class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
           </div>
 
           <!-- 生年月日 -->
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">生年月日</label>
-            <input type="date" id="birthdate"
+            <label class="block text-sm font-medium text-gray-700 mb-1">生年月日 <span class="text-red-500">*</span></label>
+            <input type="date" id="birthdate" required
               class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
           </div>
 
@@ -200,9 +200,9 @@
             </select>
           </div>
 
-          <!-- 初回授業日 -->
+          <!-- 希望入会日 -->
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">初回授業日</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">希望入会日</label>
             <input type="date" id="first-lesson-date"
               class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
           </div>
@@ -289,6 +289,32 @@
 
   <script>
     const API_BASE = 'https://rakutama-kintone.k-ariyama.workers.dev';
+
+    function toHalfKana(str) {
+      // ひらがな → 全角カタカナ
+      str = str.replace(/[\u3041-\u3096]/g, c => String.fromCharCode(c.charCodeAt(0) + 0x60));
+      // 全角カタカナ → 半角カタカナ（濁点・半濁点付き文字も分解）
+      const map = {
+        'ァ':'ｧ','ィ':'ｨ','ゥ':'ｩ','ェ':'ｪ','ォ':'ｫ','ッ':'ｯ','ャ':'ｬ','ュ':'ｭ','ョ':'ｮ',
+        'ア':'ｱ','イ':'ｲ','ウ':'ｳ','エ':'ｴ','オ':'ｵ',
+        'カ':'ｶ','キ':'ｷ','ク':'ｸ','ケ':'ｹ','コ':'ｺ',
+        'サ':'ｻ','シ':'ｼ','ス':'ｽ','セ':'ｾ','ソ':'ｿ',
+        'タ':'ﾀ','チ':'ﾁ','ツ':'ﾂ','テ':'ﾃ','ト':'ﾄ',
+        'ナ':'ﾅ','ニ':'ﾆ','ヌ':'ﾇ','ネ':'ﾈ','ノ':'ﾉ',
+        'ハ':'ﾊ','ヒ':'ﾋ','フ':'ﾌ','ヘ':'ﾍ','ホ':'ﾎ',
+        'マ':'ﾏ','ミ':'ﾐ','ム':'ﾑ','メ':'ﾒ','モ':'ﾓ',
+        'ヤ':'ﾔ','ユ':'ﾕ','ヨ':'ﾖ',
+        'ラ':'ﾗ','リ':'ﾘ','ル':'ﾙ','レ':'ﾚ','ロ':'ﾛ',
+        'ワ':'ﾜ','ヲ':'ｦ','ン':'ﾝ','ー':'ｰ','。':'｡','「':'｢','」':'｣','、':'､','・':'･',
+        'ガ':'ｶﾞ','ギ':'ｷﾞ','グ':'ｸﾞ','ゲ':'ｹﾞ','ゴ':'ｺﾞ',
+        'ザ':'ｻﾞ','ジ':'ｼﾞ','ズ':'ｽﾞ','ゼ':'ｾﾞ','ゾ':'ｿﾞ',
+        'ダ':'ﾀﾞ','ヂ':'ﾁﾞ','ヅ':'ﾂﾞ','デ':'ﾃﾞ','ド':'ﾄﾞ',
+        'バ':'ﾊﾞ','ビ':'ﾋﾞ','ブ':'ﾌﾞ','ベ':'ﾍﾞ','ボ':'ﾎﾞ',
+        'パ':'ﾊﾟ','ピ':'ﾋﾟ','プ':'ﾌﾟ','ペ':'ﾍﾟ','ポ':'ﾎﾟ',
+        'ヴ':'ｳﾞ',
+      };
+      return str.replace(/[ァ-ヴー。「」、・]/g, c => map[c] ?? c);
+    }
 
 
     // ── orgCode: determined by current domain ────────────────────────────────
@@ -441,6 +467,8 @@
       const errors = [];
       if (!familyName) errors.push('お子様の姓をご入力ください');
       if (!givenName) errors.push('お子様の名をご入力ください');
+      if (!furigana) errors.push('フリガナをご入力ください');
+      if (!birthdate) errors.push('生年月日をご入力ください');
       if (!grade) errors.push('学年を選択してください');
       if (!parentFamilyName) errors.push('保護者の姓をご入力ください');
       if (!parentGivenName) errors.push('保護者の名をご入力ください');
@@ -485,7 +513,7 @@
             student: {
               氏: familyName,
               名: givenName,
-              フリガナ: furigana,
+              フリガナ: toHalfKana(furigana),
               生年月日: birthdate,
               学校名: '',
               学年: grade,
