@@ -59,9 +59,9 @@
       </div>
 
       <!-- Notice Box -->
-      <div class="mb-6 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex gap-2">
+      <div id="notice-box" class="mb-6 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex gap-2">
         <i class="fa-solid fa-triangle-exclamation text-amber-500 text-sm mt-0.5 flex-shrink-0"></i>
-        <p class="text-xs text-amber-700">※変更のお申し込みは、翌月分からとなります。変更希望の前月10日までにお申し込みください。</p>
+        <p id="notice-text" class="text-xs text-amber-700">※コース変更は翌月分からとなります。変更希望の前月10日までにお申し込みください。</p>
       </div>
 
       <!-- Error Box -->
@@ -108,6 +108,23 @@
             <span class="text-xs font-black border-2 border-[#4A96AE] text-[#4A96AE] rounded-full px-4 py-1 font-display">変更内容</span>
           </div>
 
+          <!-- 変更種別 -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">変更種別 <span class="text-red-500">*</span></label>
+            <div class="flex gap-4">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="change-type" id="type-course" value="コース変更" checked
+                  class="accent-green-500 w-4 h-4" />
+                <span class="text-sm text-gray-700">コース変更</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="change-type" id="type-class" value="クラス変更"
+                  class="accent-green-500 w-4 h-4" />
+                <span class="text-sm text-gray-700">クラス変更</span>
+              </label>
+            </div>
+          </div>
+
           <!-- 変更希望内容 -->
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">変更希望内容 <span class="text-red-500">*</span></label>
@@ -119,10 +136,7 @@
           <!-- 希望変更時期 -->
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">希望変更時期 <span class="text-red-500">*</span></label>
-            <select id="desired-timing" required
-              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 bg-white">
-              <option value="">選択してください</option>
-            </select>
+            <div id="timing-container"></div>
           </div>
 
           <!-- 備考 -->
@@ -167,10 +181,39 @@
   <script>
     const API_BASE = 'https://rakutama-kintone.k-ariyama.workers.dev';
 
+    const NOTICES = {
+      course: '※コース変更は翌月分からとなります。変更希望の前月10日までにお申し込みください。',
+      class:  '※クラス変更は翌週月曜日以降から可能です。ご希望の開始日を選択してください。',
+    };
 
-    // Build next 3 months options
-    (function buildMonthOptions() {
-      const select = document.getElementById('desired-timing');
+    const INPUT_CLASS = 'w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 bg-white';
+
+    // Next Monday (>= 7 days from today)
+    function nextMondayDate() {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      const day = d.getDay(); // 0=Sun … 6=Sat
+      const daysUntilNextMonday = (8 - day) % 7 || 7; // always ≥7 days
+      d.setDate(d.getDate() + daysUntilNextMonday);
+      return d;
+    }
+
+    function toYMD(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const dd = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${dd}`;
+    }
+
+    function buildCourseSelect() {
+      const select = document.createElement('select');
+      select.id = 'desired-timing';
+      select.required = true;
+      select.className = INPUT_CLASS;
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = '選択してください';
+      select.appendChild(placeholder);
       const now = new Date();
       for (let i = 1; i <= 3; i++) {
         const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
@@ -180,7 +223,49 @@
         option.textContent = label;
         select.appendChild(option);
       }
-    })();
+      return select;
+    }
+
+    function buildClassDateInput() {
+      const input = document.createElement('input');
+      input.type = 'date';
+      input.id = 'desired-timing';
+      input.required = true;
+      input.className = INPUT_CLASS;
+      const minDate = nextMondayDate();
+      input.min = toYMD(minDate);
+      return input;
+    }
+
+    function getChangeType() {
+      return document.querySelector('input[name="change-type"]:checked')?.value || 'コース変更';
+    }
+
+    function updateTimingField() {
+      const container = document.getElementById('timing-container');
+      container.innerHTML = '';
+      if (getChangeType() === 'クラス変更') {
+        container.appendChild(buildClassDateInput());
+      } else {
+        container.appendChild(buildCourseSelect());
+      }
+    }
+
+    function updateNotice() {
+      const key = getChangeType() === 'クラス変更' ? 'class' : 'course';
+      document.getElementById('notice-text').textContent = NOTICES[key];
+    }
+
+    // Init
+    updateTimingField();
+
+    // Radio change
+    document.querySelectorAll('input[name="change-type"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        updateNotice();
+        updateTimingField();
+      });
+    });
 
     let studentData = null;
 
@@ -258,6 +343,7 @@
       errorBox.classList.add('hidden');
       errorBox.textContent = '';
 
+      const changeType = getChangeType();
       const changeRequest = document.getElementById('change-request').value.trim();
       const desiredTiming = document.getElementById('desired-timing').value;
       const notes = document.getElementById('notes').value.trim();
@@ -294,6 +380,7 @@
             氏: s.familyName,
             名: s.givenName,
             現在の授業ID: s.jugyoIds ? s.jugyoIds.join('、') : '',
+            変更種別: changeType,
             変更希望内容: changeRequest,
             希望時期: desiredTiming,
             備考: notes,
