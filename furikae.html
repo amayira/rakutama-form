@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="https://rakutama-tokyo.com/Pictures/favicon.jpeg" type="image/jpeg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>振替連絡フォーム | 楽珠そろばん教室</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { primary: '#22C55E', accent: '#4A96AE' },
+          fontFamily: {
+            sans: ['Noto Sans JP', 'sans-serif'],
+            display: ['Zen Kaku Gothic New', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body { font-family: 'Noto Sans JP', sans-serif; background-color: #F7FBFA; }
+    .font-display { font-family: 'Zen Kaku Gothic New', sans-serif; }
+  </style>
+</head>
+<body class="min-h-screen bg-[#F7FBFA]">
+
+  <!-- Sticky Header -->
+  <header class="sticky top-0 z-50 bg-white shadow-sm">
+    <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="https://rakutama-tokyo.com/">
+        <img src="https://rakutama-tokyo.com/Pictures/title.png" alt="楽珠そろばん教室" class="h-10 object-contain" />
+      </a>
+      <span class="hidden md:block text-sm font-medium text-gray-600">楽珠そろばん教室 各種申込フォーム</span>
+    </div>
+  </header>
+
+  <main class="max-w-2xl mx-auto px-4 py-8">
+
+    <a href="index.html" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-6 transition">
+      <i class="fa-solid fa-arrow-left text-xs"></i>
+      トップに戻る
+    </a>
+
+    <div id="form-card" class="bg-white rounded-2xl shadow-md p-6 md:p-8">
+      <div class="mb-6">
+        <h1 class="text-xl font-black text-gray-800 font-display mb-2">振替連絡フォーム</h1>
+        <p class="text-sm text-gray-500">振替受講のご連絡はこちらから。生徒番号で教室・受講クラスを確認できます。</p>
+      </div>
+
+      <div id="error-box" class="hidden mb-4 bg-red-50 border border-red-300 text-red-700 rounded-xl px-4 py-3 text-sm"></div>
+
+      <!-- Student Lookup -->
+      <div class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+        <label class="block text-sm font-medium text-gray-700 mb-2">生徒番号</label>
+        <div class="flex gap-2">
+          <input type="text" id="student-number" placeholder="例：A0000"
+            class="min-w-0 flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
+          <button type="button" id="lookup-btn"
+            class="flex-shrink-0 border-2 border-green-500 text-green-600 font-bold text-sm px-4 py-2 rounded-lg hover:bg-green-50 transition font-display flex items-center gap-2">
+            <span id="lookup-text">検索</span>
+            <i id="lookup-spinner" class="fa-solid fa-spinner fa-spin hidden text-xs"></i>
+          </button>
+        </div>
+        <div id="lookup-error" class="hidden mt-2 text-xs text-red-600"></div>
+        <div id="student-info" class="hidden mt-3 bg-white border border-green-200 rounded-lg p-3">
+          <div class="flex items-center gap-2 mb-2">
+            <i class="fa-solid fa-circle-check text-green-500 text-sm"></i>
+            <span class="text-xs font-bold text-green-600">生徒情報が見つかりました</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="bg-gray-50 rounded-lg p-2">
+              <div class="text-xs text-gray-400 mb-0.5">教室名</div>
+              <div id="info-classroom" class="text-sm font-medium text-gray-800"></div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-2">
+              <div class="text-xs text-gray-400 mb-0.5">受講中クラス</div>
+              <div id="info-jugyo" class="text-sm font-medium text-gray-800"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <form id="furikae-form" novalidate>
+
+        <div class="mb-8">
+          <div class="mb-4">
+            <span class="text-xs font-black border-2 border-[#4A96AE] text-[#4A96AE] rounded-full px-4 py-1 font-display">振替受講の内容</span>
+          </div>
+
+          <!-- 振替受講日 -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">振替受講日 <span class="text-red-500">*</span></label>
+            <input type="date" id="furikae-date" required
+              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
+          </div>
+
+          <!-- 使用するチケット -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">使用するチケット <span class="text-red-500">*</span></label>
+            <div class="relative">
+              <select id="ticket-select" required
+                class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 bg-white">
+                <option value="">生徒番号を検索し、振替受講日を選択してください</option>
+              </select>
+              <i id="ticket-spinner" class="fa-solid fa-spinner fa-spin hidden absolute right-3 top-3 text-gray-400 text-xs"></i>
+            </div>
+            <p id="ticket-error" class="hidden mt-1 text-xs text-red-500"></p>
+          </div>
+
+          <!-- 時刻 -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">時刻</label>
+            <select id="furikae-time"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 bg-white">
+              <option value="">生徒番号を検索すると選択肢が表示されます</option>
+            </select>
+          </div>
+
+          <!-- 備考 -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">備考 <span class="text-gray-400 text-xs font-normal">任意</span></label>
+            <textarea id="notes" rows="3"
+              placeholder="その他ご連絡事項があればご記入ください"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 resize-y"></textarea>
+          </div>
+        </div>
+
+        <button type="submit" id="submit-btn" disabled
+          class="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-black text-base py-3 rounded-full shadow-md transition font-display flex items-center justify-center gap-2">
+          <span id="submit-text">送信する</span>
+          <i id="submit-spinner" class="fa-solid fa-spinner fa-spin hidden"></i>
+        </button>
+        <p id="submit-hint" class="text-xs text-center mt-2 text-amber-600 font-medium"><i class="fa-solid fa-triangle-exclamation mr-1"></i>上の生徒番号欄で「検索」を押してから送信してください</p>
+
+      </form>
+    </div>
+
+    <div id="success-screen" class="hidden bg-white rounded-2xl shadow-md p-8 text-center">
+      <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+        <i class="fa-solid fa-check text-green-500 text-2xl"></i>
+      </div>
+      <h2 class="text-xl font-black text-gray-800 font-display mb-3">送信が完了しました</h2>
+      <p class="text-sm text-gray-500 mb-6">振替受講のご連絡を受け付けました。</p>
+      <a href="index.html"
+        class="inline-block bg-green-500 hover:bg-green-600 text-white font-black text-sm py-2.5 px-8 rounded-full shadow-md transition font-display">
+        トップに戻る
+      </a>
+    </div>
+
+  </main>
+
+  <footer class="text-center py-8 text-xs text-gray-400">
+    <p>&copy; 2026 Alpha-Brain LLC.</p>
+  </footer>
+
+  <script>
+    const API_BASE = 'https://rakutama-kintone.k-ariyama.workers.dev';
+
+    let studentData = null;
+    let ticketReqId = 0;
+
+    // 授業ID/名から "HH:MM" を抽出（例: "早宮校-火1700" → "17:00", "16時クラス" → "16:00"）
+    function extractTime(cls) {
+      const mId = String(cls.id).match(/(\d{2})(\d{2})$/);
+      if (mId) return `${mId[1]}:${mId[2]}`;
+      const mId2 = String(cls.id).match(/(\d{2})$/);
+      if (mId2) return `${mId2[1]}:00`;
+      const mName = String(cls.name).match(/(\d{1,2})時/);
+      if (mName) return `${mName[1].padStart(2, '0')}:00`;
+      return '';
+    }
+
+    function fmtDate(ymd) {
+      if (!ymd) return '';
+      const [y, m, d] = ymd.split('-');
+      return `${y}年${parseInt(m)}月${parseInt(d)}日`;
+    }
+    function fmtShort(ymd) {
+      if (!ymd) return '';
+      const [, m, d] = ymd.split('-');
+      return `${parseInt(m)}月${parseInt(d)}日`;
+    }
+
+    // ── チケット取得 ──────────────────────────────────────────────────────────
+    async function loadTickets() {
+      const myId = ++ticketReqId;
+      const date = document.getElementById('furikae-date').value;
+      const ticketSelect = document.getElementById('ticket-select');
+      const ticketSpinner = document.getElementById('ticket-spinner');
+      const ticketError = document.getElementById('ticket-error');
+
+      ticketSelect.innerHTML = '<option value="">選択してください</option>';
+      ticketError.classList.add('hidden');
+      ticketError.textContent = '';
+      document.getElementById('submit-btn').disabled = true;
+      document.getElementById('submit-hint').classList.remove('hidden');
+
+      if (!studentData || !date) return;
+
+      const studentNumber = document.getElementById('student-number').value.trim();
+      ticketSpinner.classList.remove('hidden');
+
+      try {
+        const res = await fetch(
+          `${API_BASE}/api/furikae-tickets?studentNumber=${encodeURIComponent(studentNumber)}&date=${encodeURIComponent(date)}`
+        );
+        const data = await res.json();
+        if (myId !== ticketReqId) return; // 古いリクエストは破棄
+
+        if (!res.ok || !data.success) throw new Error(data.error || 'チケットの取得に失敗しました');
+
+        if (data.tickets.length === 0) {
+          ticketSelect.innerHTML = '<option value="">利用可能なチケットがありません</option>';
+          ticketError.textContent = 'この日付に使用できる振替チケットが見つかりませんでした。';
+          ticketError.classList.remove('hidden');
+        } else {
+          data.tickets.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t.id;
+            const period = (t['振替期日_始_'] && t['振替期日_終_'])
+              ? `　期限：${fmtShort(t['振替期日_始_'])}〜${fmtShort(t['振替期日_終_'])}`
+              : '';
+            opt.textContent = `欠席日：${fmtDate(t['欠席日'])}${period}`;
+            ticketSelect.appendChild(opt);
+          });
+          document.getElementById('submit-btn').disabled = false;
+          document.getElementById('submit-hint').classList.add('hidden');
+        }
+      } catch (err) {
+        if (myId !== ticketReqId) return;
+        ticketError.textContent = err.message || 'チケット情報の取得中にエラーが発生しました。';
+        ticketError.classList.remove('hidden');
+      } finally {
+        if (myId === ticketReqId) ticketSpinner.classList.add('hidden');
+      }
+    }
+
+    document.getElementById('furikae-date').addEventListener('change', loadTickets);
+
+    // ── Lookup ────────────────────────────────────────────────────────────────
+    document.getElementById('lookup-btn').addEventListener('click', async () => {
+      const studentNumber = document.getElementById('student-number').value.trim();
+      const lookupError = document.getElementById('lookup-error');
+      const studentInfo = document.getElementById('student-info');
+      const lookupBtn = document.getElementById('lookup-btn');
+      const lookupText = document.getElementById('lookup-text');
+      const lookupSpinner = document.getElementById('lookup-spinner');
+
+      lookupError.classList.add('hidden');
+      studentInfo.classList.add('hidden');
+      studentData = null;
+
+      // チケットをリセット
+      document.getElementById('ticket-select').innerHTML = '<option value="">生徒番号を検索し、振替受講日を選択してください</option>';
+      document.getElementById('ticket-error').classList.add('hidden');
+      document.getElementById('submit-btn').disabled = true;
+      document.getElementById('submit-hint').classList.remove('hidden');
+
+      if (!studentNumber) {
+        lookupError.textContent = '生徒番号を入力してください';
+        lookupError.classList.remove('hidden');
+        return;
+      }
+
+      lookupBtn.disabled = true;
+      lookupText.textContent = '検索中...';
+      lookupSpinner.classList.remove('hidden');
+
+      try {
+        const response = await fetch(`${API_BASE}/api/lookup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ studentNumber }),
+        });
+
+        if (!response.ok) {
+          if (response.status === 404) throw new Error('生徒番号が見つかりませんでした。番号をご確認ください。');
+          throw new Error(`エラーが発生しました（${response.status}）`);
+        }
+
+        const data = await response.json();
+        studentData = data;
+        const s = data.student;
+
+        document.getElementById('info-classroom').textContent = s.classroom || '―';
+        document.getElementById('info-jugyo').textContent = s.jugyoIds && s.jugyoIds.length > 0 ? s.jugyoIds.join('、') : '―';
+        studentInfo.classList.remove('hidden');
+
+        // 教室の授業一覧を取得して時刻プルダウンを更新
+        const timeSelect = document.getElementById('furikae-time');
+        timeSelect.innerHTML = '<option value="">選択してください</option>';
+        if (s.classroom) {
+          try {
+            const jRes = await fetch(`${API_BASE}/api/jugyo?classroom=${encodeURIComponent(s.classroom)}`);
+            const jData = await jRes.json();
+            if (jRes.ok && jData.success) {
+              const seen = new Set();
+              jData.classes.forEach(cls => {
+                const timeVal = extractTime(cls);
+                if (!timeVal || seen.has(timeVal)) return;
+                seen.add(timeVal);
+                const opt = document.createElement('option');
+                opt.value = timeVal;
+                opt.textContent = `${timeVal}〜`;
+                timeSelect.appendChild(opt);
+              });
+            }
+          } catch { /* 取得失敗は無視 */ }
+        }
+
+        // 振替受講日がすでに入力済みならチケットを再取得
+        if (document.getElementById('furikae-date').value) {
+          await loadTickets();
+        }
+
+      } catch (err) {
+        lookupError.textContent = err.message || '検索中にエラーが発生しました。';
+        lookupError.classList.remove('hidden');
+      } finally {
+        lookupBtn.disabled = false;
+        lookupText.textContent = '検索';
+        lookupSpinner.classList.add('hidden');
+      }
+    });
+
+    document.getElementById('student-number').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); document.getElementById('lookup-btn').click(); }
+    });
+
+    // ── Form submission ───────────────────────────────────────────────────────
+    document.getElementById('furikae-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const errorBox = document.getElementById('error-box');
+      errorBox.classList.add('hidden');
+      errorBox.textContent = '';
+
+      const furikaeDate = document.getElementById('furikae-date').value;
+      const ticketSelect = document.getElementById('ticket-select');
+      const ticketId = ticketSelect.value;
+      const furikaeTime = document.getElementById('furikae-time').value;
+      const notes = document.getElementById('notes').value.trim();
+
+      const errors = [];
+      if (!studentData) errors.push('生徒番号を検索してください');
+      if (!furikaeDate) errors.push('振替受講日を選択してください');
+      if (!ticketId) errors.push('使用するチケットを選択してください');
+
+      if (errors.length > 0) {
+        errorBox.innerHTML = errors.join('<br />');
+        errorBox.classList.remove('hidden');
+        errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const submitBtn = document.getElementById('submit-btn');
+      const submitText = document.getElementById('submit-text');
+      const submitSpinner = document.getElementById('submit-spinner');
+      submitBtn.disabled = true;
+      submitText.textContent = '送信中...';
+      submitSpinner.classList.remove('hidden');
+
+      try {
+        const response = await fetch(`${API_BASE}/api/furikae`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ticketId,
+            振替受講日: furikaeDate,
+            時刻: furikaeTime,
+            備考: notes,
+          }),
+        });
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || data.message || `送信に失敗しました（${response.status}）`);
+        }
+
+        document.getElementById('form-card').classList.add('hidden');
+        document.getElementById('success-screen').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      } catch (err) {
+        errorBox.textContent = err.message || '送信中にエラーが発生しました。しばらく経ってから再度お試しください。';
+        errorBox.classList.remove('hidden');
+        errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        submitBtn.disabled = false;
+        submitText.textContent = '送信する';
+        submitSpinner.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+</html>

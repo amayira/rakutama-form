@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="https://rakutama-tokyo.com/Pictures/favicon.jpeg" type="image/jpeg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>検定 申込フォーム | 楽珠そろばん教室</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#22C55E',
+            accent: '#4A96AE',
+          },
+          fontFamily: {
+            sans: ['Noto Sans JP', 'sans-serif'],
+            display: ['Zen Kaku Gothic New', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body { font-family: 'Noto Sans JP', sans-serif; background-color: #F7FBFA; }
+    .font-display { font-family: 'Zen Kaku Gothic New', sans-serif; }
+  </style>
+</head>
+<body class="min-h-screen bg-[#F7FBFA]">
+
+  <!-- Sticky Header -->
+  <header class="sticky top-0 z-50 bg-white shadow-sm">
+    <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="https://rakutama-tokyo.com/">
+        <img src="https://rakutama-tokyo.com/Pictures/title.png" alt="楽珠そろばん教室" class="h-10 object-contain" />
+      </a>
+      <span class="hidden md:block text-sm font-medium text-gray-600">楽珠そろばん教室 各種申込フォーム</span>
+    </div>
+  </header>
+
+  <main class="max-w-2xl mx-auto px-4 py-8">
+
+    <!-- Back link -->
+    <a href="index.html" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-6 transition">
+      <i class="fa-solid fa-arrow-left text-xs"></i>
+      トップに戻る
+    </a>
+
+    <!-- Form Card -->
+    <div id="form-card" class="bg-white rounded-2xl shadow-md p-6 md:p-8">
+      <div class="mb-6">
+        <h1 class="text-xl font-black text-gray-800 font-display mb-2">検定 申込フォーム</h1>
+        <p class="text-sm text-gray-500">珠算・暗算検定のお申し込みはこちらから。</p>
+      </div>
+
+      <!-- Error Box -->
+      <div id="error-box" class="hidden mb-4 bg-red-50 border border-red-300 text-red-700 rounded-xl px-4 py-3 text-sm"></div>
+
+      <!-- Student Lookup -->
+      <div class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+        <label class="block text-sm font-medium text-gray-700 mb-2">生徒番号</label>
+        <div class="flex gap-2">
+          <input type="text" id="student-number" placeholder="例：A0000"
+            class="min-w-0 flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
+          <button type="button" id="lookup-btn"
+            class="flex-shrink-0 border-2 border-green-500 text-green-600 font-bold text-sm px-4 py-2 rounded-lg hover:bg-green-50 transition font-display flex items-center gap-2">
+            <span id="lookup-text">検索</span>
+            <i id="lookup-spinner" class="fa-solid fa-spinner fa-spin hidden text-xs"></i>
+          </button>
+        </div>
+        <div id="lookup-error" class="hidden mt-2 text-xs text-red-600"></div>
+
+        <!-- Student Info Card -->
+        <div id="student-info" class="hidden mt-3 bg-white border border-green-200 rounded-lg p-3">
+          <div class="flex items-center gap-2 mb-2">
+            <i class="fa-solid fa-circle-check text-green-500 text-sm"></i>
+            <span class="text-xs font-bold text-green-600">生徒情報が見つかりました</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="bg-gray-50 rounded-lg p-2">
+              <div class="text-xs text-gray-400 mb-0.5">教室名</div>
+              <div id="info-classroom" class="text-sm font-medium text-gray-800"></div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-2">
+              <div class="text-xs text-gray-400 mb-0.5">受講中クラス</div>
+              <div id="info-jugyo" class="text-sm font-medium text-gray-800"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <form id="kentei-form" novalidate>
+
+        <!-- Section: 受験情報 -->
+        <div class="mb-8">
+          <div class="mb-4">
+            <span class="text-xs font-black border-2 border-[#4A96AE] text-[#4A96AE] rounded-full px-4 py-1 font-display">受験情報</span>
+          </div>
+
+          <!-- 受験日 -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">受験日 <span class="text-red-500">*</span></label>
+            <input type="date" id="exam-date" required
+              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
+          </div>
+
+          <!-- 受験会場 -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">受験会場 <span class="text-red-500">*</span></label>
+            <input type="text" id="exam-venue" placeholder="例：早宮校" required
+              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
+          </div>
+        </div>
+
+        <!-- Section: 受験する種目 -->
+        <div class="mb-8">
+          <div class="mb-4">
+            <span class="text-xs font-black border-2 border-[#4A96AE] text-[#4A96AE] rounded-full px-4 py-1 font-display">受験する種目</span>
+          </div>
+          <p class="text-xs text-gray-400 mb-4">少なくとも1種目を選択してください</p>
+
+          <!-- 暗算 -->
+          <div class="mb-4 border border-gray-200 rounded-xl p-4">
+            <label class="flex items-center gap-3 cursor-pointer mb-3">
+              <input type="checkbox" id="anzan-check" class="w-4 h-4 accent-green-500 rounded" />
+              <span class="text-sm font-bold text-gray-700 font-display">暗算</span>
+            </label>
+            <div id="anzan-grade-field" class="hidden">
+              <label class="block text-xs text-gray-500 mb-1">暗算受験級</label>
+              <select id="anzan-grade"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 bg-white">
+                <option value="">選択してください</option>
+                <option>10級</option><option>9級</option><option>8級</option>
+                <option>7級</option><option>6級</option><option>5級</option>
+                <option>4級</option><option>準3級</option><option>3級</option>
+                <option>準2級</option><option>2級</option><option>準1級</option>
+                <option>1級</option><option>段位</option>
+              </select>
+              <label class="block text-xs text-gray-500 mt-3 mb-1">暗算受験時刻</label>
+              <select id="anzan-time"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 bg-white">
+                <option value="">選択してください</option>
+                <option value="10:00">10時00分</option>
+                <option value="11:00">11時00分</option>
+                <option value="13:00">13時00分</option>
+                <option value="14:00">14時00分</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 珠算 -->
+          <div class="mb-4 border border-gray-200 rounded-xl p-4">
+            <label class="flex items-center gap-3 cursor-pointer mb-3">
+              <input type="checkbox" id="shuzan-check" class="w-4 h-4 accent-green-500 rounded" />
+              <span class="text-sm font-bold text-gray-700 font-display">珠算</span>
+            </label>
+            <div id="shuzan-grade-field" class="hidden">
+              <label class="block text-xs text-gray-500 mb-1">珠算受験級</label>
+              <select id="shuzan-grade"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 bg-white">
+                <option value="">選択してください</option>
+                <option>10級</option><option>9級</option><option>8級</option>
+                <option>7級</option><option>6級</option><option>5級</option>
+                <option>4級</option><option>準3級</option><option>3級</option>
+                <option>準2級</option><option>2級</option><option>準1級</option>
+                <option>1級</option><option>段位</option>
+              </select>
+              <label class="block text-xs text-gray-500 mt-3 mb-1">珠算受験時刻</label>
+              <select id="shuzan-time"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 bg-white">
+                <option value="">選択してください</option>
+                <option value="10:20">10時20分</option>
+                <option value="11:20">11時20分</option>
+                <option value="13:20">13時20分</option>
+                <option value="14:20">14時20分</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="submit-btn" disabled
+          class="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-black text-base py-3 rounded-full shadow-md transition font-display flex items-center justify-center gap-2">
+          <span id="submit-text">送信する</span>
+          <i id="submit-spinner" class="fa-solid fa-spinner fa-spin hidden"></i>
+        </button>
+        <p id="submit-hint" class="text-xs text-center mt-2 text-amber-600 font-medium"><i class="fa-solid fa-triangle-exclamation mr-1"></i>上の生徒番号欄で「検索」を押してから送信してください</p>
+
+      </form>
+    </div>
+
+    <!-- Success Screen -->
+    <div id="success-screen" class="hidden bg-white rounded-2xl shadow-md p-8 text-center">
+      <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+        <i class="fa-solid fa-check text-green-500 text-2xl"></i>
+      </div>
+      <h2 class="text-xl font-black text-gray-800 font-display mb-3">送信が完了しました</h2>
+      <p class="text-sm text-gray-500 mb-6">検定のお申し込みを受け付けました。</p>
+      <a href="index.html"
+        class="inline-block bg-green-500 hover:bg-green-600 text-white font-black text-sm py-2.5 px-8 rounded-full shadow-md transition font-display">
+        トップに戻る
+      </a>
+    </div>
+
+  </main>
+
+  <footer class="text-center py-8 text-xs text-gray-400">
+    <p>&copy; 2026 Alpha-Brain LLC.</p>
+  </footer>
+
+  <script>
+    const API_BASE = 'https://rakutama-kintone.k-ariyama.workers.dev';
+
+
+    let studentData = null;
+
+    // Toggle grade selects
+    document.getElementById('shuzan-check').addEventListener('change', (e) => {
+      document.getElementById('shuzan-grade-field').classList.toggle('hidden', !e.target.checked);
+    });
+    document.getElementById('anzan-check').addEventListener('change', (e) => {
+      document.getElementById('anzan-grade-field').classList.toggle('hidden', !e.target.checked);
+    });
+
+    // Lookup
+    document.getElementById('lookup-btn').addEventListener('click', async () => {
+      const studentNumber = document.getElementById('student-number').value.trim();
+      const lookupError = document.getElementById('lookup-error');
+      const studentInfo = document.getElementById('student-info');
+      const lookupBtn = document.getElementById('lookup-btn');
+      const lookupText = document.getElementById('lookup-text');
+      const lookupSpinner = document.getElementById('lookup-spinner');
+
+      lookupError.classList.add('hidden');
+      studentInfo.classList.add('hidden');
+      studentData = null;
+      document.getElementById('submit-btn').disabled = true;
+      document.getElementById('submit-hint').classList.remove('hidden');
+
+      if (!studentNumber) {
+        lookupError.textContent = '生徒番号を入力してください';
+        lookupError.classList.remove('hidden');
+        return;
+      }
+
+      lookupBtn.disabled = true;
+      lookupText.textContent = '検索中...';
+      lookupSpinner.classList.remove('hidden');
+
+      try {
+        const response = await fetch(`${API_BASE}/api/lookup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ studentNumber }),
+        });
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error('生徒番号が見つかりませんでした。番号をご確認ください。');
+          }
+          throw new Error(`エラーが発生しました（${response.status}）`);
+        }
+
+        const data = await response.json();
+        studentData = data;
+        const s = data.student;
+
+        document.getElementById('info-classroom').textContent = s.classroom || '―';
+        document.getElementById('info-jugyo').textContent = s.jugyoIds && s.jugyoIds.length > 0 ? s.jugyoIds.join('、') : '―';
+        studentInfo.classList.remove('hidden');
+        document.getElementById('submit-btn').disabled = false;
+        document.getElementById('submit-hint').classList.add('hidden');
+
+      } catch (err) {
+        lookupError.textContent = err.message || '検索中にエラーが発生しました。';
+        lookupError.classList.remove('hidden');
+      } finally {
+        lookupBtn.disabled = false;
+        lookupText.textContent = '検索';
+        lookupSpinner.classList.add('hidden');
+      }
+    });
+
+    document.getElementById('student-number').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('lookup-btn').click();
+      }
+    });
+
+    // Form submission
+    document.getElementById('kentei-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const errorBox = document.getElementById('error-box');
+      errorBox.classList.add('hidden');
+      errorBox.textContent = '';
+
+      const examDate = document.getElementById('exam-date').value;
+      const examVenue = document.getElementById('exam-venue').value.trim();
+      const shuzanChecked = document.getElementById('shuzan-check').checked;
+      const anzanChecked = document.getElementById('anzan-check').checked;
+      const shuzanGrade = document.getElementById('shuzan-grade').value;
+      const shuzanTime = document.getElementById('shuzan-time').value;
+      const anzanGrade = document.getElementById('anzan-grade').value;
+      const anzanTime = document.getElementById('anzan-time').value;
+      const studentNumber = document.getElementById('student-number').value.trim();
+
+      const errors = [];
+      if (!studentData) errors.push('生徒番号を検索してください');
+      if (!examDate) errors.push('受験日を選択してください');
+      if (!examVenue) errors.push('受験会場を入力してください');
+      if (!shuzanChecked && !anzanChecked) errors.push('受験する種目を少なくとも1つ選択してください');
+      if (shuzanChecked && !shuzanGrade) errors.push('珠算受験級を選択してください');
+      if (shuzanChecked && !shuzanTime) errors.push('珠算受験時刻を選択してください');
+      if (anzanChecked && !anzanGrade) errors.push('暗算受験級を選択してください');
+      if (anzanChecked && !anzanTime) errors.push('暗算受験時刻を選択してください');
+
+      if (errors.length > 0) {
+        errorBox.innerHTML = errors.join('<br />');
+        errorBox.classList.remove('hidden');
+        errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const s = studentData.student;
+      const submitBtn = document.getElementById('submit-btn');
+      const submitText = document.getElementById('submit-text');
+      const submitSpinner = document.getElementById('submit-spinner');
+      submitBtn.disabled = true;
+      submitText.textContent = '送信中...';
+      submitSpinner.classList.remove('hidden');
+
+      try {
+        const response = await fetch(`${API_BASE}/api/kentei`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            生徒番号: studentNumber,
+            請求ID: s.billingId,
+            教室名: s.classroom,
+            氏: s.familyName,
+            名: s.givenName,
+            受験日: examDate,
+            受験会場: examVenue,
+            珠算受験級: shuzanChecked ? shuzanGrade : '',
+            珠算受験時刻: shuzanChecked ? shuzanTime : '',
+            暗算受験級: anzanChecked ? anzanGrade : '',
+            暗算受験時刻: anzanChecked ? anzanTime : '',
+          }),
+        });
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || data.message || `送信に失敗しました（${response.status}）`);
+        }
+
+        document.getElementById('form-card').classList.add('hidden');
+        document.getElementById('success-screen').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      } catch (err) {
+        errorBox.textContent = err.message || '送信中にエラーが発生しました。しばらく経ってから再度お試しください。';
+        errorBox.classList.remove('hidden');
+        errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        submitBtn.disabled = false;
+        submitText.textContent = '送信する';
+        submitSpinner.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+</html>

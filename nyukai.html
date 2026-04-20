@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="https://rakutama-tokyo.com/Pictures/favicon.jpeg" type="image/jpeg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>入会 申込フォーム | 楽珠そろばん教室</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#22C55E',
+            accent: '#4A96AE',
+          },
+          fontFamily: {
+            sans: ['Noto Sans JP', 'sans-serif'],
+            display: ['Zen Kaku Gothic New', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body { font-family: 'Noto Sans JP', sans-serif; background-color: #F7FBFA; }
+    .font-display { font-family: 'Zen Kaku Gothic New', sans-serif; }
+  </style>
+</head>
+<body class="min-h-screen bg-[#F7FBFA]">
+
+  <!-- Sticky Header -->
+  <header class="sticky top-0 z-50 bg-white shadow-sm">
+    <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="https://rakutama-tokyo.com/">
+        <img src="https://rakutama-tokyo.com/Pictures/title.png" alt="楽珠そろばん教室" class="h-10 object-contain" />
+      </a>
+      <span class="hidden md:block text-sm font-medium text-gray-600">楽珠そろばん教室 各種申込フォーム</span>
+    </div>
+  </header>
+
+  <main class="max-w-2xl mx-auto px-4 py-8">
+
+    <!-- Back link -->
+    <a href="index.html" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-6 transition">
+      <i class="fa-solid fa-arrow-left text-xs"></i>
+      トップに戻る
+    </a>
+
+    <!-- Form Card -->
+    <div id="form-card" class="bg-white rounded-2xl shadow-md p-6 md:p-8">
+      <div class="mb-6">
+        <h1 class="text-xl font-black text-gray-800 font-display mb-2">入会 申込フォーム</h1>
+        <p class="text-sm text-gray-500">入会のお申し込みです。ご記入後、担当者よりご連絡いたします。</p>
+      </div>
+
+      <!-- Error Box -->
+      <div id="error-box" class="hidden mb-4 bg-red-50 border border-red-300 text-red-700 rounded-xl px-4 py-3 text-sm"></div>
+
+      <form id="nyukai-form" novalidate>
+
+        <!-- Section: お子様の情報 -->
+        <div class="mb-8">
+          <div class="mb-4">
+            <span class="text-xs font-black border-2 border-[#4A96AE] text-[#4A96AE] rounded-full px-4 py-1 font-display">お子様の情報</span>
+          </div>
+
+          <!-- 氏名 -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">お子様のお名前 <span class="text-red-500">*</span></label>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <input type="text" id="family-name" placeholder="氏（姓）" required
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
+              </div>
+              <div>
+                <input type="text" id="given-name" placeholder="名（名）" required
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
+              </div>
+            </div>
+          </div>
+
+          <!-- フリガナ -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">フリガナ <span class="text-red-500">*</span></label>
+            <input type="text" id="furigana" placeholder="カタカナでご入力ください" required
+              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
+          </div>
+
+          <!-- 生年月日 -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">生年月日 <span class="text-red-500">*</span></label>
+            <input type="date" id="birthdate" required
+              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
+          </div>
+
+          <!-- 学年 -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">学年 <span class="text-red-500">*</span></label>
+            <select id="grade" required
+              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 bg-white">
+              <option value="">選択してください</option>
+              <option>年少</option>
+              <option>年中</option>
+              <option>年長</option>
+              <option>小1</option>
+              <option>小2</option>
+              <option>小3</option>
+              <option>小4</option>
+              <option>小5</option>
+              <option>小6</option>
+              <option>中1</option>
+              <option>中2</option>
+              <option>中3</option>
+              <option>その他</option>
+            </select>
+          </div>
+
+          <!-- そろばん経験 -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">そろばん経験</label>
+            <div class="flex gap-6">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="experience" value="なし" checked class="accent-green-500" />
+                <span class="text-sm">なし</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="experience" value="あり" class="accent-green-500" />
+                <span class="text-sm">あり</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 級・段 -->
+          <div id="level-field" class="mb-4 hidden">
+            <label class="block text-sm font-medium text-gray-700 mb-1">級・段</label>
+            <input type="text" id="level" placeholder="例：8級"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
+          </div>
+        </div>
+
+        <!-- Section: 保護者・連絡先 -->
+        <div class="mb-8">
+          <div class="mb-4">
+            <span class="text-xs font-black border-2 border-[#4A96AE] text-[#4A96AE] rounded-full px-4 py-1 font-display">保護者・連絡先</span>
+          </div>
+
+          <!-- 保護者氏名 -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">保護者のお名前 <span class="text-red-500">*</span></label>
+            <div class="grid grid-cols-2 gap-3">
+              <input type="text" id="parent-family-name" placeholder="氏（姓）" required
+                class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
+              <input type="text" id="parent-given-name" placeholder="名（名）" required
+                class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
+            </div>
+          </div>
+
+          <!-- 電話番号 -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">電話番号 <span class="text-red-500">*</span></label>
+            <input type="tel" id="tel" placeholder="例：090-1234-5678" required
+              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
+          </div>
+
+          <!-- メールアドレス -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">メールアドレス <span class="text-red-500">*</span></label>
+            <input type="email" id="email" placeholder="例：example@email.com" required
+              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
+          </div>
+
+          <!-- 郵便番号 -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">郵便番号 <span class="text-red-500">*</span></label>
+            <input type="text" id="postal-code" placeholder="例：176-0001" required maxlength="8"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
+          </div>
+
+          <!-- 住所 -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">住所 <span class="text-red-500">*</span></label>
+            <input type="text" id="address" placeholder="例：東京都練馬区早宮1-1-1" required
+              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
+          </div>
+        </div>
+
+        <!-- Section: 入会希望 -->
+        <div class="mb-8">
+          <div class="mb-4">
+            <span class="text-xs font-black border-2 border-[#4A96AE] text-[#4A96AE] rounded-full px-4 py-1 font-display">入会希望</span>
+          </div>
+
+          <!-- 希望教室 -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">希望教室 <span class="text-red-500">*</span></label>
+            <select id="classroom" required
+              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 bg-white">
+              <option value="">選択してください</option>
+              <option>早宮校</option>
+              <option>中村校</option>
+              <option>氷川台校</option>
+            </select>
+          </div>
+
+          <!-- 希望入会日 -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">希望入会日</label>
+            <input type="date" id="first-lesson-date"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
+          </div>
+
+          <!-- クーポンコード -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">クーポンコード <span class="text-gray-400 text-xs font-normal">任意</span></label>
+            <input type="text" id="coupon-code" placeholder="お持ちの方はご入力ください"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
+          </div>
+
+          <!-- 備考 -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">備考 <span class="text-gray-400 text-xs font-normal">任意</span></label>
+            <textarea id="notes" rows="3"
+              placeholder="ご質問・その他お気軽にどうぞ"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 resize-y"></textarea>
+          </div>
+        </div>
+
+        <!-- Section: クラス・月謝 -->
+        <div class="mb-8">
+          <div class="mb-4">
+            <span class="text-xs font-black border-2 border-[#4A96AE] text-[#4A96AE] rounded-full px-4 py-1 font-display">クラス・月謝</span>
+          </div>
+
+          <!-- 希望クラス -->
+          <div class="mb-4" id="jugyo-section" style="display:none">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              希望クラス <span class="text-red-500">*</span>
+              <span class="text-gray-400 text-xs font-normal ml-1">（複数選択可）</span>
+            </label>
+            <div id="jugyo-spinner" class="hidden text-sm text-gray-400 flex items-center gap-2 py-2">
+              <i class="fa-solid fa-spinner fa-spin"></i> 読み込み中...
+            </div>
+            <div id="jugyo-checkboxes" class="border border-gray-200 rounded-lg divide-y divide-gray-100 bg-white"></div>
+            <p id="jugyo-error" class="hidden mt-1 text-xs text-red-500"></p>
+          </div>
+
+          <!-- 月謝コース -->
+          <div class="mb-4" id="gakuhi-section" style="display:none">
+            <label class="block text-sm font-medium text-gray-700 mb-1">月謝コース <span class="text-red-500">*</span><span class="text-gray-400 text-xs font-normal ml-1">（週何コマ受けるかによって異なります）</span></label>
+            <div class="relative">
+              <select id="gakuhi-select"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 bg-white">
+                <option value="">月謝コースを選択してください</option>
+              </select>
+              <span id="gakuhi-spinner" class="hidden ml-2 absolute right-8 top-3 text-gray-400 text-xs">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+              </span>
+            </div>
+            <p id="gakuhi-error" class="hidden mt-1 text-xs text-red-500"></p>
+          </div>
+        </div>
+
+        <!-- Section: そろばん購入 -->
+        <div class="mb-8">
+          <div class="mb-4">
+            <span class="text-xs font-black border-2 border-[#4A96AE] text-[#4A96AE] rounded-full px-4 py-1 font-display">そろばん購入</span>
+          </div>
+          <p class="text-xs text-gray-400 mb-3">ご希望の方はお選びください（任意・複数選択可）</p>
+          <div class="flex flex-col gap-4">
+
+            <!-- 播州そろばん -->
+            <div class="border border-gray-200 rounded-xl overflow-hidden bg-white">
+              <div class="flex items-center gap-4 px-4 pt-4 pb-3 border-b border-gray-100">
+                <img src="https://rakutama-tokyo.com/Pictures/banshu-soroban.jpg" alt="播州そろばん" class="w-20 h-20 object-cover rounded-lg flex-shrink-0 cursor-zoom-in" onclick="openLightbox(this)" />
+                <div>
+                  <p class="text-sm font-bold text-gray-700">播州そろばん</p>
+                  <p class="text-xs text-gray-400 mt-0.5">ワンタッチ23桁 / 送料実費</p>
+                </div>
+              </div>
+              <label class="flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-green-50 transition border-b border-gray-100">
+                <input type="checkbox" name="soroban" value="【播州そろばん】ワンタッチ23桁そろばん（カバ）13,200円[送料実費]" class="accent-green-500 w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span class="text-sm text-gray-700">ワンタッチ23桁そろばん（カバ）<span class="font-medium ml-2">13,200円</span></span>
+              </label>
+              <label class="flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-green-50 transition">
+                <input type="checkbox" name="soroban" value="【播州そろばん】ワンタッチ23桁そろばん（ツゲ）14,300円[送料実費]" class="accent-green-500 w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span class="text-sm text-gray-700">ワンタッチ23桁そろばん（ツゲ）<span class="font-medium ml-2">14,300円</span></span>
+              </label>
+            </div>
+
+            <!-- ソロマットそろばん -->
+            <div class="border border-gray-200 rounded-xl overflow-hidden bg-white">
+              <div class="flex items-center gap-4 px-4 pt-4 pb-3 border-b border-gray-100">
+                <img src="https://rakutama-tokyo.com/Pictures/soromat-soroban.jpg" alt="ソロマットそろばん" class="w-20 h-20 object-cover rounded-lg flex-shrink-0 cursor-zoom-in" onclick="openLightbox(this)" />
+                <div>
+                  <p class="text-sm font-bold text-gray-700">ソロマットそろばん</p>
+                  <p class="text-xs text-gray-400 mt-0.5">ワンタッチ23桁 / 送料実費</p>
+                </div>
+              </div>
+              <label class="flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-green-50 transition">
+                <input type="checkbox" name="soroban" value="【ソロマットそろばん購入】ワンタッチ23桁そろばん（カバ）8,800円[送料実費]" class="accent-green-500 w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span class="text-sm text-gray-700">ワンタッチ23桁そろばん（カバ）<span class="font-medium ml-2">8,800円</span></span>
+              </label>
+            </div>
+
+            <!-- COLLETE -->
+            <div class="border border-gray-200 rounded-xl overflow-hidden bg-white">
+              <div class="flex items-center gap-4 px-4 pt-4 pb-3 border-b border-gray-100">
+                <img src="https://rakutama-tokyo.com/Pictures/COLLETE-soroban.jpg" alt="COLLETEそろばん" class="w-20 h-20 object-cover rounded-lg flex-shrink-0 cursor-zoom-in" onclick="openLightbox(this)" />
+                <div>
+                  <p class="text-sm font-bold text-gray-700">COLLETE</p>
+                  <p class="text-xs text-gray-400 mt-0.5">カラー20桁 / 各3,850円 / 送料660円</p>
+                </div>
+              </div>
+              <label class="flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-green-50 transition border-b border-gray-100">
+                <input type="checkbox" name="soroban" value="【COLLETE】カラー20桁そろばん（ブルー）3,850円[送料660円]" class="accent-green-500 w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span class="text-sm text-gray-700">カラー20桁そろばん（ブルー）<span class="font-medium ml-2">3,850円</span></span>
+              </label>
+              <label class="flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-green-50 transition border-b border-gray-100">
+                <input type="checkbox" name="soroban" value="【COLLETE】カラー20桁そろばん（グリーン）3,850円[送料660円]" class="accent-green-500 w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span class="text-sm text-gray-700">カラー20桁そろばん（グリーン）<span class="font-medium ml-2">3,850円</span></span>
+              </label>
+              <label class="flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-green-50 transition border-b border-gray-100">
+                <input type="checkbox" name="soroban" value="【COLLETE】カラー20桁そろばん（ピンク）3,850円[送料660円]" class="accent-green-500 w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span class="text-sm text-gray-700">カラー20桁そろばん（ピンク）<span class="font-medium ml-2">3,850円</span></span>
+              </label>
+              <label class="flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-green-50 transition">
+                <input type="checkbox" name="soroban" value="【COLLETE】カラー20桁そろばん（グレー）3,850円[送料660円]" class="accent-green-500 w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span class="text-sm text-gray-700">カラー20桁そろばん（グレー）<span class="font-medium ml-2">3,850円</span></span>
+              </label>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="submit-btn"
+          class="w-full bg-green-500 hover:bg-green-600 text-white font-black text-base py-3 rounded-full shadow-md transition font-display flex items-center justify-center gap-2">
+          <span id="submit-text">送信する</span>
+          <i id="submit-spinner" class="fa-solid fa-spinner fa-spin hidden"></i>
+        </button>
+
+      </form>
+    </div>
+
+    <!-- Success Screen -->
+    <div id="success-screen" class="hidden bg-white rounded-2xl shadow-md p-8 text-center">
+      <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+        <i class="fa-solid fa-check text-green-500 text-2xl"></i>
+      </div>
+      <h2 class="text-xl font-black text-gray-800 font-display mb-3">送信が完了しました</h2>
+      <p class="text-sm text-gray-500 mb-6">入会のお申し込みを受け付けました。担当者よりご連絡いたします。</p>
+      <a href="index.html"
+        class="inline-block bg-green-500 hover:bg-green-600 text-white font-black text-sm py-2.5 px-8 rounded-full shadow-md transition font-display">
+        トップに戻る
+      </a>
+    </div>
+
+  </main>
+
+  <!-- Image Lightbox -->
+  <div id="lightbox" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4" onclick="closeLightbox(event)">
+    <button onclick="document.getElementById('lightbox').classList.add('hidden')" class="absolute top-4 right-4 text-white text-3xl leading-none">&times;</button>
+    <img id="lightbox-img" src="" alt="" class="max-w-full max-h-[85vh] rounded-xl shadow-2xl object-contain" />
+  </div>
+
+  <footer class="text-center py-8 text-xs text-gray-400">
+    <p>&copy; 2026 Alpha-Brain LLC.</p>
+  </footer>
+
+  <script>
+    const API_BASE = 'https://rakutama-kintone.k-ariyama.workers.dev';
+
+    // ── Lightbox ────────────────────────────────────────────────────────────
+    function openLightbox(img) {
+      const lb = document.getElementById('lightbox');
+      document.getElementById('lightbox-img').src = img.src;
+      document.getElementById('lightbox-img').alt = img.alt;
+      lb.classList.remove('hidden');
+      lb.classList.add('flex');
+    }
+    function closeLightbox(e) {
+      if (e.target === e.currentTarget) {
+        const lb = document.getElementById('lightbox');
+        lb.classList.add('hidden');
+        lb.classList.remove('flex');
+      }
+    }
+
+    function toHalfKana(str) {
+      // ひらがな → 全角カタカナ
+      str = str.replace(/[\u3041-\u3096]/g, c => String.fromCharCode(c.charCodeAt(0) + 0x60));
+      // 全角カタカナ → 半角カタカナ（濁点・半濁点付き文字も分解）
+      const map = {
+        'ァ':'ｧ','ィ':'ｨ','ゥ':'ｩ','ェ':'ｪ','ォ':'ｫ','ッ':'ｯ','ャ':'ｬ','ュ':'ｭ','ョ':'ｮ',
+        'ア':'ｱ','イ':'ｲ','ウ':'ｳ','エ':'ｴ','オ':'ｵ',
+        'カ':'ｶ','キ':'ｷ','ク':'ｸ','ケ':'ｹ','コ':'ｺ',
+        'サ':'ｻ','シ':'ｼ','ス':'ｽ','セ':'ｾ','ソ':'ｿ',
+        'タ':'ﾀ','チ':'ﾁ','ツ':'ﾂ','テ':'ﾃ','ト':'ﾄ',
+        'ナ':'ﾅ','ニ':'ﾆ','ヌ':'ﾇ','ネ':'ﾈ','ノ':'ﾉ',
+        'ハ':'ﾊ','ヒ':'ﾋ','フ':'ﾌ','ヘ':'ﾍ','ホ':'ﾎ',
+        'マ':'ﾏ','ミ':'ﾐ','ム':'ﾑ','メ':'ﾒ','モ':'ﾓ',
+        'ヤ':'ﾔ','ユ':'ﾕ','ヨ':'ﾖ',
+        'ラ':'ﾗ','リ':'ﾘ','ル':'ﾙ','レ':'ﾚ','ロ':'ﾛ',
+        'ワ':'ﾜ','ヲ':'ｦ','ン':'ﾝ','ー':'ｰ','。':'｡','「':'｢','」':'｣','、':'､','・':'･',
+        'ガ':'ｶﾞ','ギ':'ｷﾞ','グ':'ｸﾞ','ゲ':'ｹﾞ','ゴ':'ｺﾞ',
+        'ザ':'ｻﾞ','ジ':'ｼﾞ','ズ':'ｽﾞ','ゼ':'ｾﾞ','ゾ':'ｿﾞ',
+        'ダ':'ﾀﾞ','ヂ':'ﾁﾞ','ヅ':'ﾂﾞ','デ':'ﾃﾞ','ド':'ﾄﾞ',
+        'バ':'ﾊﾞ','ビ':'ﾋﾞ','ブ':'ﾌﾞ','ベ':'ﾍﾞ','ボ':'ﾎﾞ',
+        'パ':'ﾊﾟ','ピ':'ﾋﾟ','プ':'ﾌﾟ','ペ':'ﾍﾟ','ポ':'ﾎﾟ',
+        'ヴ':'ｳﾞ',
+      };
+      return str.replace(/[ァ-ヴー。「」、・]/g, c => map[c] ?? c);
+    }
+
+
+    // ── orgCode: determined by current domain ────────────────────────────────
+    const DOMAIN_ORG_MAP = {
+      'form.rakutama-tokyo.com':   'アルファーブレイン',
+      'rakutama-tokyo.com':        'アルファーブレイン',
+      'form.rakutama-soroban.com': '本部',
+    };
+    const orgCode = DOMAIN_ORG_MAP[window.location.hostname] ?? 'アルファーブレイン';
+
+    // ── Toggle 級・段 field ──────────────────────────────────────────────────
+    document.querySelectorAll('input[name="experience"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        const levelField = document.getElementById('level-field');
+        levelField.classList.toggle('hidden', radio.value !== 'あり' || !radio.checked);
+      });
+    });
+
+    // ── 希望教室 → fetch jugyo list (チェックボックス形式) ───────────────────
+    document.getElementById('classroom').addEventListener('change', async function () {
+      const classroom = this.value;
+      const jugyoSection = document.getElementById('jugyo-section');
+      const jugyoCheckboxes = document.getElementById('jugyo-checkboxes');
+      const jugyoSpinner = document.getElementById('jugyo-spinner');
+      const jugyoError = document.getElementById('jugyo-error');
+      const gakuhiSection = document.getElementById('gakuhi-section');
+      const gakuhiSelect = document.getElementById('gakuhi-select');
+
+      // Reset downstream
+      jugyoCheckboxes.innerHTML = '';
+      gakuhiSelect.innerHTML = '<option value="">月謝コースを選択してください</option>';
+      gakuhiSection.style.display = 'none';
+      jugyoError.classList.add('hidden');
+      jugyoError.textContent = '';
+
+      if (!classroom) {
+        jugyoSection.style.display = 'none';
+        return;
+      }
+
+      jugyoSection.style.display = '';
+      jugyoSpinner.classList.remove('hidden');
+      jugyoCheckboxes.innerHTML = '';
+
+      try {
+        const res = await fetch(`${API_BASE}/api/jugyo?classroom=${encodeURIComponent(classroom)}`);
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'クラスの取得に失敗しました');
+
+        if (data.classes.length === 0) {
+          jugyoError.textContent = 'この教室には開講中のクラスがありません。';
+          jugyoError.classList.remove('hidden');
+        } else {
+          data.classes.forEach((cls, i) => {
+            const label = document.createElement('label');
+            label.className = 'flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-green-50 transition';
+            label.innerHTML = `
+              <input type="checkbox" name="jugyo" value="${cls.id}" data-name="${cls.name}"
+                class="accent-green-500 w-4 h-4 flex-shrink-0" />
+              <span class="text-sm text-gray-700">${cls.name}</span>`;
+            jugyoCheckboxes.appendChild(label);
+          });
+          // チェック変更で月謝セクションを表示
+          jugyoCheckboxes.querySelectorAll('input[name="jugyo"]').forEach(cb => {
+            cb.addEventListener('change', loadGakuhi);
+          });
+        }
+      } catch (err) {
+        jugyoError.textContent = err.message || 'クラス情報の取得中にエラーが発生しました。';
+        jugyoError.classList.remove('hidden');
+      } finally {
+        jugyoSpinner.classList.add('hidden');
+      }
+    });
+
+    // ── 希望クラスのチェック変更 → fetch gakuhi list ────────────────────────
+    async function loadGakuhi() {
+      const checked = document.querySelectorAll('input[name="jugyo"]:checked');
+      const gakuhiSection = document.getElementById('gakuhi-section');
+      const gakuhiSelect = document.getElementById('gakuhi-select');
+      const gakuhiSpinner = document.getElementById('gakuhi-spinner');
+      const gakuhiError = document.getElementById('gakuhi-error');
+
+      gakuhiSelect.innerHTML = '<option value="">月謝コースを選択してください</option>';
+      gakuhiError.classList.add('hidden');
+      gakuhiError.textContent = '';
+
+      if (checked.length === 0) {
+        gakuhiSection.style.display = 'none';
+        return;
+      }
+
+      gakuhiSection.style.display = '';
+      gakuhiSpinner.classList.remove('hidden');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/gakuhi?orgCode=${encodeURIComponent(orgCode)}`);
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || '月謝情報の取得に失敗しました');
+
+        if (data.fees.length === 0) {
+          gakuhiError.textContent = '月謝コースが見つかりませんでした。';
+          gakuhiError.classList.remove('hidden');
+        } else {
+          data.fees.forEach(fee => {
+            const opt = document.createElement('option');
+            opt.value = fee.id;
+            opt.textContent = fee.name;
+            gakuhiSelect.appendChild(opt);
+          });
+        }
+      } catch (err) {
+        gakuhiError.textContent = err.message || '月謝情報の取得中にエラーが発生しました。';
+        gakuhiError.classList.remove('hidden');
+      } finally {
+        gakuhiSpinner.classList.add('hidden');
+      }
+    }
+
+    // ── Form submission ──────────────────────────────────────────────────────
+    document.getElementById('nyukai-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const errorBox = document.getElementById('error-box');
+      errorBox.classList.add('hidden');
+      errorBox.textContent = '';
+
+      const familyName = document.getElementById('family-name').value.trim();
+      const givenName = document.getElementById('given-name').value.trim();
+      const furigana = document.getElementById('furigana').value.trim();
+      const birthdate = document.getElementById('birthdate').value;
+      const grade = document.getElementById('grade').value;
+      const experience = document.querySelector('input[name="experience"]:checked').value;
+      const levelIfAny = experience === 'あり' ? document.getElementById('level').value.trim() : '';
+      const parentFamilyName = document.getElementById('parent-family-name').value.trim();
+      const parentGivenName = document.getElementById('parent-given-name').value.trim();
+      const tel = document.getElementById('tel').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const postalCode = document.getElementById('postal-code').value.trim();
+      const address = document.getElementById('address').value.trim();
+      const classroom = document.getElementById('classroom').value;
+      const jugyoChecked = [...document.querySelectorAll('input[name="jugyo"]:checked')];
+      const jugyoIds = jugyoChecked.map(cb => cb.value);
+      const gakuhiSelect = document.getElementById('gakuhi-select');
+      const gakuhiId = gakuhiSelect.value;
+      const gakuhiName = gakuhiSelect.options[gakuhiSelect.selectedIndex]?.text ?? "";
+      const firstLessonDate = document.getElementById('first-lesson-date').value;
+      const couponCode = document.getElementById('coupon-code').value.trim();
+      const notes = document.getElementById('notes').value.trim();
+      const sorobanOrders = [...document.querySelectorAll('input[name="soroban"]:checked')].map(cb => cb.value);
+
+      // Validation
+      const errors = [];
+      if (!familyName) errors.push('お子様の姓をご入力ください');
+      if (!givenName) errors.push('お子様の名をご入力ください');
+      if (!furigana) errors.push('フリガナをご入力ください');
+      if (!birthdate) errors.push('生年月日をご入力ください');
+      if (!grade) errors.push('学年を選択してください');
+      if (!parentFamilyName) errors.push('保護者の姓をご入力ください');
+      if (!parentGivenName) errors.push('保護者の名をご入力ください');
+      if (!tel) errors.push('電話番号をご入力ください');
+      if (!email) errors.push('メールアドレスをご入力ください');
+      if (!postalCode) errors.push('郵便番号をご入力ください');
+      if (!address) errors.push('住所をご入力ください');
+      if (!classroom) errors.push('希望教室を選択してください');
+      if (jugyoIds.length === 0) errors.push('希望クラスを1つ以上選択してください');
+      if (gakuhiSelect.selectedIndex <= 0) errors.push('月謝コースを選択してください');
+
+      if (errors.length > 0) {
+        errorBox.innerHTML = errors.join('<br />');
+        errorBox.classList.remove('hidden');
+        errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const submitBtn = document.getElementById('submit-btn');
+      const submitText = document.getElementById('submit-text');
+      const submitSpinner = document.getElementById('submit-spinner');
+      submitBtn.disabled = true;
+      submitText.textContent = '送信中...';
+      submitSpinner.classList.remove('hidden');
+
+      try {
+        const response = await fetch(`${API_BASE}/api/nyukai`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            isSibling: false,
+            sorobanOrders,
+            notes,
+            guardian: {
+              保護者名: `${parentFamilyName}　${parentGivenName}`,
+              フリガナ: '',
+              電話番号1: tel,
+              電話番号2: '',
+              メールアドレス: email,
+              郵便番号: postalCode,
+              住所: address,
+              口座名義人: '',
+              クーポンコード: couponCode,
+            },
+            student: {
+              氏: familyName,
+              名: givenName,
+              フリガナ: toHalfKana(furigana),
+              生年月日: birthdate,
+              学校名: '',
+              学年: grade,
+              そろばん経験: experience,
+              '級・段': levelIfAny,
+              教室名: classroom,
+              初回授業日: firstLessonDate,
+              jugyoIds,
+              gakuhiId,
+              gakuhiName,
+            },
+          }),
+        });
+
+        const resData = await response.json().catch(() => ({}));
+        if (!response.ok || resData.success === false) {
+          throw new Error(resData.error || `送信に失敗しました（${response.status}）`);
+        }
+
+        document.getElementById('form-card').classList.add('hidden');
+        document.getElementById('success-screen').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      } catch (err) {
+        errorBox.textContent = err.message || '送信中にエラーが発生しました。しばらく経ってから再度お試しください。';
+        errorBox.classList.remove('hidden');
+        errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } finally {
+        submitBtn.disabled = false;
+        submitText.textContent = '送信する';
+        submitSpinner.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+</html>

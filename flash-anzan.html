@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="https://rakutama-tokyo.com/Pictures/favicon.jpeg" type="image/jpeg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>フラッシュ暗算 申込フォーム | 楽珠そろばん教室</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { primary: '#22C55E', accent: '#4A96AE' },
+          fontFamily: {
+            sans: ['Noto Sans JP', 'sans-serif'],
+            display: ['Zen Kaku Gothic New', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body { font-family: 'Noto Sans JP', sans-serif; background-color: #F7FBFA; }
+    .font-display { font-family: 'Zen Kaku Gothic New', sans-serif; }
+  </style>
+</head>
+<body class="min-h-screen bg-[#F7FBFA]">
+
+  <!-- Sticky Header -->
+  <header class="sticky top-0 z-50 bg-white shadow-sm">
+    <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="https://rakutama-tokyo.com/">
+        <img src="https://rakutama-tokyo.com/Pictures/title.png" alt="楽珠そろばん教室" class="h-10 object-contain" />
+      </a>
+      <span class="hidden md:block text-sm font-medium text-gray-600">楽珠そろばん教室 各種申込フォーム</span>
+    </div>
+  </header>
+
+  <main class="max-w-2xl mx-auto px-4 py-8">
+
+    <a href="index.html" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-6 transition">
+      <i class="fa-solid fa-arrow-left text-xs"></i>
+      トップに戻る
+    </a>
+
+    <div id="form-card" class="bg-white rounded-2xl shadow-md p-6 md:p-8">
+      <div class="mb-6">
+        <h1 class="text-xl font-black text-gray-800 font-display mb-2">フラッシュ暗算 申込フォーム</h1>
+        <p class="text-sm text-gray-500">検定受験・練習ソフト購入のお申し込みはこちらから。</p>
+      </div>
+
+      <!-- 案内文 -->
+      <div class="mb-6 bg-blue-50 border border-blue-100 rounded-xl p-4 text-sm text-gray-700 leading-relaxed">
+        <p class="font-bold text-blue-700 mb-2"><i class="fa-solid fa-circle-info mr-1"></i>フラッシュ暗算について</p>
+        <p>練習ソフトと検定ソフトをお使いのWindowsのパソコンでインストールができます。こちらのフォームで申込みの上、事務局の許可申請後はご自身のタイミングで受験ができます。許可申請は原則平日12時〜18時に行います。</p>
+        <ul class="mt-2 space-y-0.5 text-xs text-gray-600 list-disc list-inside">
+          <li>100点満点。70点以上で合格。</li>
+          <li>50点以上で準級・準段の合格が認められ合格証が発行されます。</li>
+          <li>１度だけ再受験ができます。再受験期限は14日間です。</li>
+        </ul>
+      </div>
+
+      <!-- マイページ未登録案内 -->
+      <div class="mb-6 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-3">
+        <i class="fa-solid fa-triangle-exclamation text-amber-500 text-sm mt-0.5 flex-shrink-0"></i>
+        <p class="text-sm text-gray-700">
+          フラッシュ暗算検定マイページに未登録の方は
+          <a href="https://rakutama-soroban.com/blog/flashanzankentei" target="_blank" rel="noopener noreferrer"
+            class="text-blue-600 underline font-medium hover:text-blue-800">こちらから登録してください（無料）</a>
+        </p>
+      </div>
+
+      <!-- Error Box -->
+      <div id="error-box" class="hidden mb-4 bg-red-50 border border-red-300 text-red-700 rounded-xl px-4 py-3 text-sm"></div>
+
+      <!-- Student Lookup -->
+      <div class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+        <label class="block text-sm font-medium text-gray-700 mb-2">生徒番号</label>
+        <div class="flex gap-2">
+          <input type="text" id="student-number" placeholder="例：A0000"
+            class="min-w-0 flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
+          <button type="button" id="lookup-btn"
+            class="flex-shrink-0 border-2 border-green-500 text-green-600 font-bold text-sm px-4 py-2 rounded-lg hover:bg-green-50 transition font-display flex items-center gap-2">
+            <span id="lookup-text">検索</span>
+            <i id="lookup-spinner" class="fa-solid fa-spinner fa-spin hidden text-xs"></i>
+          </button>
+        </div>
+        <div id="lookup-error" class="hidden mt-2 text-xs text-red-600"></div>
+        <div id="student-info" class="hidden mt-3 bg-white border border-green-200 rounded-lg p-3">
+          <div class="flex items-center gap-2 mb-2">
+            <i class="fa-solid fa-circle-check text-green-500 text-sm"></i>
+            <span class="text-xs font-bold text-green-600">生徒情報が見つかりました</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="bg-gray-50 rounded-lg p-2">
+              <div class="text-xs text-gray-400 mb-0.5">教室名</div>
+              <div id="info-classroom" class="text-sm font-medium text-gray-800"></div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-2">
+              <div class="text-xs text-gray-400 mb-0.5">受講中クラス</div>
+              <div id="info-jugyo" class="text-sm font-medium text-gray-800"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <form id="flash-anzan-form" novalidate>
+
+        <!-- Section: 申込内容 -->
+        <div class="mb-8">
+          <div class="mb-4">
+            <span class="text-xs font-black border-2 border-[#4A96AE] text-[#4A96AE] rounded-full px-4 py-1 font-display">申込内容</span>
+          </div>
+          <p class="text-xs text-gray-400 mb-4">少なくとも1つ選択してください</p>
+
+          <div class="border border-gray-200 rounded-xl divide-y divide-gray-100 bg-white">
+
+            <!-- 検定受験 -->
+            <label class="flex items-start gap-3 px-4 py-4 cursor-pointer hover:bg-green-50 transition">
+              <input type="checkbox" name="item" id="item-kentei" value="検定受験" data-price="0"
+                class="accent-green-500 w-4 h-4 flex-shrink-0 mt-0.5" />
+              <div class="flex-1">
+                <span class="text-sm font-bold text-gray-700">検定受験</span>
+                <p class="text-xs text-gray-400 mt-0.5">受験級は前回の続きとなります</p>
+                <img src="https://rakutama-tokyo.com/Pictures/kenteiryou.png"
+                  alt="フラッシュ暗算検定料金表"
+                  class="mt-3 w-full max-w-xs rounded-lg border border-gray-200 object-contain" />
+              </div>
+            </label>
+
+            <!-- 練習ソフト購入365日 -->
+            <label class="flex items-start gap-3 px-4 py-4 cursor-pointer hover:bg-green-50 transition">
+              <input type="checkbox" name="item" id="item-365" value="練習ソフト購入365日" data-price="3300"
+                class="accent-green-500 w-4 h-4 flex-shrink-0 mt-0.5" />
+              <div class="flex-1 flex items-start justify-between gap-2">
+                <span class="text-sm font-bold text-gray-700">練習ソフト購入 365日</span>
+                <span class="text-sm font-bold text-green-700 flex-shrink-0">3,300円</span>
+              </div>
+            </label>
+
+            <!-- 練習ソフト購入30日 -->
+            <label class="flex items-start gap-3 px-4 py-4 cursor-pointer hover:bg-green-50 transition">
+              <input type="checkbox" name="item" id="item-30" value="練習ソフト購入30日" data-price="330"
+                class="accent-green-500 w-4 h-4 flex-shrink-0 mt-0.5" />
+              <div class="flex-1 flex items-start justify-between gap-2">
+                <span class="text-sm font-bold text-gray-700">練習ソフト購入 30日</span>
+                <span class="text-sm font-bold text-green-700 flex-shrink-0">330円</span>
+              </div>
+            </label>
+
+          </div>
+
+        </div>
+
+        <button type="submit" id="submit-btn" disabled
+          class="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-black text-base py-3 rounded-full shadow-md transition font-display flex items-center justify-center gap-2">
+          <span id="submit-text">送信する</span>
+          <i id="submit-spinner" class="fa-solid fa-spinner fa-spin hidden"></i>
+        </button>
+        <p id="submit-hint" class="text-xs text-center mt-2 text-amber-600 font-medium"><i class="fa-solid fa-triangle-exclamation mr-1"></i>上の生徒番号欄で「検索」を押してから送信してください</p>
+
+      </form>
+    </div>
+
+    <!-- Success Screen -->
+    <div id="success-screen" class="hidden bg-white rounded-2xl shadow-md p-8 text-center">
+      <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+        <i class="fa-solid fa-check text-green-500 text-2xl"></i>
+      </div>
+      <h2 class="text-xl font-black text-gray-800 font-display mb-3">送信が完了しました</h2>
+      <p class="text-sm text-gray-500 mb-6">フラッシュ暗算のお申し込みを受け付けました。事務局より許可申請を行います。</p>
+      <a href="index.html"
+        class="inline-block bg-green-500 hover:bg-green-600 text-white font-black text-sm py-2.5 px-8 rounded-full shadow-md transition font-display">
+        トップに戻る
+      </a>
+    </div>
+
+  </main>
+
+  <footer class="text-center py-8 text-xs text-gray-400">
+    <p>&copy; 2026 Alpha-Brain LLC.</p>
+  </footer>
+
+  <script>
+    const API_BASE = 'https://rakutama-kintone.k-ariyama.workers.dev';
+
+    let studentData = null;
+
+
+    // ── Lookup ────────────────────────────────────────────────────────────────
+    document.getElementById('lookup-btn').addEventListener('click', async () => {
+      const studentNumber = document.getElementById('student-number').value.trim();
+      const lookupError = document.getElementById('lookup-error');
+      const studentInfo = document.getElementById('student-info');
+      const lookupBtn = document.getElementById('lookup-btn');
+      const lookupText = document.getElementById('lookup-text');
+      const lookupSpinner = document.getElementById('lookup-spinner');
+
+      lookupError.classList.add('hidden');
+      studentInfo.classList.add('hidden');
+      studentData = null;
+      document.getElementById('submit-btn').disabled = true;
+      document.getElementById('submit-hint').classList.remove('hidden');
+
+      if (!studentNumber) {
+        lookupError.textContent = '生徒番号を入力してください';
+        lookupError.classList.remove('hidden');
+        return;
+      }
+
+      lookupBtn.disabled = true;
+      lookupText.textContent = '検索中...';
+      lookupSpinner.classList.remove('hidden');
+
+      try {
+        const response = await fetch(`${API_BASE}/api/lookup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ studentNumber }),
+        });
+
+        if (!response.ok) {
+          if (response.status === 404) throw new Error('生徒番号が見つかりませんでした。番号をご確認ください。');
+          throw new Error(`エラーが発生しました（${response.status}）`);
+        }
+
+        const data = await response.json();
+        studentData = data;
+        const s = data.student;
+
+        document.getElementById('info-classroom').textContent = s.classroom || '―';
+        document.getElementById('info-jugyo').textContent = s.jugyoIds && s.jugyoIds.length > 0 ? s.jugyoIds.join('、') : '―';
+        studentInfo.classList.remove('hidden');
+        document.getElementById('submit-btn').disabled = false;
+        document.getElementById('submit-hint').classList.add('hidden');
+
+      } catch (err) {
+        lookupError.textContent = err.message || '検索中にエラーが発生しました。';
+        lookupError.classList.remove('hidden');
+      } finally {
+        lookupBtn.disabled = false;
+        lookupText.textContent = '検索';
+        lookupSpinner.classList.add('hidden');
+      }
+    });
+
+    document.getElementById('student-number').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); document.getElementById('lookup-btn').click(); }
+    });
+
+    // ── Form submission ───────────────────────────────────────────────────────
+    document.getElementById('flash-anzan-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const errorBox = document.getElementById('error-box');
+      errorBox.classList.add('hidden');
+      errorBox.textContent = '';
+
+      const studentNumber = document.getElementById('student-number').value.trim();
+      const checkedItems = [...document.querySelectorAll('input[name="item"]:checked')];
+
+      const errors = [];
+      if (!studentData) errors.push('生徒番号を検索してください');
+      if (checkedItems.length === 0) errors.push('申込内容を少なくとも1つ選択してください');
+
+      if (errors.length > 0) {
+        errorBox.innerHTML = errors.join('<br />');
+        errorBox.classList.remove('hidden');
+        errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const 項目名 = checkedItems.map(cb => cb.value).join('、');
+      const kenteiChecked = checkedItems.some(cb => cb.value === '検定受験');
+      const 金額 = kenteiChecked ? "" : checkedItems.reduce((sum, cb) => sum + parseInt(cb.dataset.price || '0', 10), 0);
+      const today = new Date();
+      const 請求基準日 = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+      const submitBtn = document.getElementById('submit-btn');
+      const submitText = document.getElementById('submit-text');
+      const submitSpinner = document.getElementById('submit-spinner');
+      submitBtn.disabled = true;
+      submitText.textContent = '送信中...';
+      submitSpinner.classList.remove('hidden');
+
+      try {
+        const response = await fetch(`${API_BASE}/api/flash-anzan`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            生徒番号: studentNumber,
+            請求基準日,
+            項目名,
+            金額,
+          }),
+        });
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || data.message || `送信に失敗しました（${response.status}）`);
+        }
+
+        document.getElementById('form-card').classList.add('hidden');
+        document.getElementById('success-screen').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      } catch (err) {
+        errorBox.textContent = err.message || '送信中にエラーが発生しました。しばらく経ってから再度お試しください。';
+        errorBox.classList.remove('hidden');
+        errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        submitBtn.disabled = false;
+        submitText.textContent = '送信する';
+        submitSpinner.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+</html>

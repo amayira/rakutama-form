@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="https://rakutama-tokyo.com/Pictures/favicon.jpeg" type="image/jpeg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>各種申込フォーム | 楽珠そろばん教室</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#22C55E',
+            accent: '#4A96AE',
+          },
+          fontFamily: {
+            sans: ['Noto Sans JP', 'sans-serif'],
+            display: ['Zen Kaku Gothic New', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body { font-family: 'Noto Sans JP', sans-serif; background-color: #F7FBFA; }
+    .font-display { font-family: 'Zen Kaku Gothic New', sans-serif; }
+  </style>
+</head>
+<body class="min-h-screen bg-[#F7FBFA]">
+
+  <!-- Sticky Header -->
+  <header class="sticky top-0 z-50 bg-white shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="https://rakutama-tokyo.com/">
+        <img src="https://rakutama-tokyo.com/Pictures/title.png" alt="楽珠そろばん教室" class="h-10 object-contain" />
+      </a>
+      <span class="hidden md:block text-sm font-medium text-gray-600">楽珠そろばん教室 各種申込フォーム</span>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-br from-teal-50 via-green-50 to-teal-100 py-16 text-center px-4">
+    <span class="inline-block bg-white text-[#4A96AE] text-xs font-bold border border-[#4A96AE] rounded-full px-4 py-1 mb-4 font-display tracking-wide">楽珠そろばん教室</span>
+    <h1 class="text-3xl md:text-4xl font-black text-gray-800 font-display mb-3">各種申込フォーム</h1>
+    <p class="text-gray-500 text-sm md:text-base">体験・入会・各種お手続きはこちらから</p>
+  </section>
+
+  <!-- Cards Section -->
+  <main class="max-w-5xl mx-auto px-4 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+      <!-- Section 1: 新規の方へ -->
+      <div>
+        <div class="flex items-center gap-2 mb-5">
+          <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+            <i class="fa-solid fa-door-open text-green-500 text-sm"></i>
+          </div>
+          <h2 class="text-base font-black text-gray-700 font-display">新規の方へ</h2>
+        </div>
+        <div class="flex flex-col gap-4">
+
+          <!-- Card 1 -->
+          <a href="taiken.html" class="group bg-white rounded-2xl shadow-md hover:shadow-lg transition p-5 flex items-center gap-4">
+            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-green-100 flex items-center justify-center group-hover:bg-green-200 transition">
+              <i class="fa-solid fa-chalkboard-user text-green-500 text-lg"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-black text-gray-800 font-display text-sm">体験授業を申し込む</div>
+              <div class="text-xs text-gray-400 mt-0.5">無料体験授業のお申し込みはこちら</div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-gray-300 group-hover:text-green-400 transition text-sm flex-shrink-0"></i>
+          </a>
+
+          <!-- Card 2 -->
+          <a href="nyukai.html" class="group bg-white rounded-2xl shadow-md hover:shadow-lg transition p-5 flex items-center gap-4">
+            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-green-100 flex items-center justify-center group-hover:bg-green-200 transition">
+              <i class="fa-solid fa-pen-to-square text-green-500 text-lg"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-black text-gray-800 font-display text-sm">入会を申し込む</div>
+              <div class="text-xs text-gray-400 mt-0.5">入会のお申し込みはこちら</div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-gray-300 group-hover:text-green-400 transition text-sm flex-shrink-0"></i>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- Section 2: 在籍生徒の方へ -->
+      <div>
+        <div class="flex items-center gap-2 mb-5">
+          <div class="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center">
+            <i class="fa-solid fa-user text-[#4A96AE] text-sm"></i>
+          </div>
+          <h2 class="text-base font-black text-gray-700 font-display">在籍生徒の方へ</h2>
+        </div>
+        <div class="flex flex-col gap-4">
+
+          <!-- Card 3 -->
+          <a href="kesseki.html" class="group bg-white rounded-2xl shadow-md hover:shadow-lg transition p-5 flex items-center gap-4">
+            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center group-hover:bg-teal-200 transition">
+              <i class="fa-solid fa-calendar-xmark text-[#4A96AE] text-lg"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-black text-gray-800 font-display text-sm">欠席連絡</div>
+              <div class="text-xs text-gray-400 mt-0.5">欠席のご連絡はこちら</div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-gray-300 group-hover:text-[#4A96AE] transition text-sm flex-shrink-0"></i>
+          </a>
+
+          <!-- Card 4 -->
+          <a href="furikae.html" class="group bg-white rounded-2xl shadow-md hover:shadow-lg transition p-5 flex items-center gap-4">
+            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center group-hover:bg-teal-200 transition">
+              <i class="fa-solid fa-calendar-days text-[#4A96AE] text-lg"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-black text-gray-800 font-display text-sm">振替申請</div>
+              <div class="text-xs text-gray-400 mt-0.5">振替授業のお申し込みはこちら</div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-gray-300 group-hover:text-[#4A96AE] transition text-sm flex-shrink-0"></i>
+          </a>
+
+          <!-- Card 5 -->
+          <a href="class-change.html" class="group bg-white rounded-2xl shadow-md hover:shadow-lg transition p-5 flex items-center gap-4">
+            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center group-hover:bg-teal-200 transition">
+              <i class="fa-solid fa-arrows-rotate text-[#4A96AE] text-lg"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-black text-gray-800 font-display text-sm">クラス・コースの変更</div>
+              <div class="text-xs text-gray-400 mt-0.5">クラス・コース変更のお申し込みはこちら</div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-gray-300 group-hover:text-[#4A96AE] transition text-sm flex-shrink-0"></i>
+          </a>
+
+          <!-- Card 6 -->
+          <a href="kentei.html" class="group bg-white rounded-2xl shadow-md hover:shadow-lg transition p-5 flex items-center gap-4">
+            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center group-hover:bg-teal-200 transition">
+              <i class="fa-solid fa-award text-[#4A96AE] text-lg"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-black text-gray-800 font-display text-sm">検定の申し込み</div>
+              <div class="text-xs text-gray-400 mt-0.5">珠算・暗算検定のお申し込みはこちら</div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-gray-300 group-hover:text-[#4A96AE] transition text-sm flex-shrink-0"></i>
+          </a>
+
+          <!-- Card 7 -->
+          <a href="flash-anzan.html" class="group bg-white rounded-2xl shadow-md hover:shadow-lg transition p-5 flex items-center gap-4">
+            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center group-hover:bg-teal-200 transition">
+              <i class="fa-solid fa-bolt text-[#4A96AE] text-lg"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-black text-gray-800 font-display text-sm">フラッシュ暗算検定の申し込み</div>
+              <div class="text-xs text-gray-400 mt-0.5">フラッシュ暗算検定のお申し込みはこちら</div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-gray-300 group-hover:text-[#4A96AE] transition text-sm flex-shrink-0"></i>
+          </a>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center py-8 text-xs text-gray-400">
+    <p>&copy; 2026 Alpha-Brain LLC.</p>
+  </footer>
+
+  <script>
+  </script>
+</body>
+</html>
