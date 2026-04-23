@@ -139,6 +139,23 @@ async function kintoneGetById(appId, recordId, token) {
   return data; // { record: { ... } }
 }
 
+/**
+ * 時刻フィールドを kintone が受け付ける "HH:MM" 形式に正規化する。
+ * クラス名（例: "早宮校(火)16時クラス"）が送られてきた場合も変換する。
+ */
+function normalizeTime(val) {
+  if (!val) return "";
+  // すでに HH:MM 形式なら OK（秒付きも許容）
+  if (/^\d{2}:\d{2}/.test(val)) return val.slice(0, 5);
+  // 授業ID末尾の HHMM 形式: "早宮校-火1700" → "17:00"
+  const mId = String(val).match(/(\d{2})(\d{2})$/);
+  if (mId) return `${mId[1]}:${mId[2]}`;
+  // クラス名中の "16時" → "16:00"
+  const mName = String(val).match(/(\d{1,2})時/);
+  if (mName) return `${mName[1].padStart(2, "0")}:00`;
+  return "";
+}
+
 // ─── 採番ヘルパー ─────────────────────────────────────────────────────────────
 
 /**
@@ -287,7 +304,8 @@ async function handleKesseki(body, env) {
     振替受講日: body["振替受講日"] ?? "",
     備考: body["備考"] ?? "",
   };
-  if (body["時刻"]) fields["時刻"] = body["時刻"];
+  const jikoku = normalizeTime(body["時刻"]);
+  if (jikoku) fields["時刻"] = jikoku;
   const record = buildRecord(fields);
 
   const furikaeToken = [env.TOKEN_FURIKAE, env.TOKEN_SEITO_NEW].filter(Boolean).join(",");
@@ -358,7 +376,8 @@ async function handleFurikae(body, env) {
     振替受講日: body["振替受講日"] ?? "",
     備考: body["備考"] ?? "",
   };
-  if (body["時刻"]) furikaeFields["時刻"] = body["時刻"];
+  const furikaeJikoku = normalizeTime(body["時刻"]);
+  if (furikaeJikoku) furikaeFields["時刻"] = furikaeJikoku;
   const record = buildRecord(furikaeFields);
 
   const furikaeToken = [env.TOKEN_FURIKAE, env.TOKEN_SEITO_NEW].filter(Boolean).join(",");
