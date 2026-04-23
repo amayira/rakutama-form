@@ -275,7 +275,7 @@ async function handleTaiken(body, env) {
  * Creates a record in 振替管理 (App 14).
  */
 async function handleKesseki(body, env) {
-  const record = buildRecord({
+  const fields = {
     生徒番号: body["生徒番号"] ?? "",
     請求ID: body["請求ID"] ?? "",
     教室名: body["教室名"] ?? "",
@@ -285,9 +285,10 @@ async function handleKesseki(body, env) {
     振替期日_始_: body["振替期日_始_"] ?? "",
     振替期日_終_: body["振替期日_終_"] ?? "",
     振替受講日: body["振替受講日"] ?? "",
-    時刻: body["時刻"] ?? "",
     備考: body["備考"] ?? "",
-  });
+  };
+  if (body["時刻"]) fields["時刻"] = body["時刻"];
+  const record = buildRecord(fields);
 
   const furikaeToken = [env.TOKEN_FURIKAE, env.TOKEN_SEITO_NEW].filter(Boolean).join(",");
   await kintonePost(APP.FURIKAE, record, furikaeToken);
@@ -353,11 +354,12 @@ async function handleFurikae(body, env) {
     return { success: false, error: "ticketId は必須です", status: 400 };
   }
 
-  const record = buildRecord({
+  const furikaeFields = {
     振替受講日: body["振替受講日"] ?? "",
-    時刻: body["時刻"] ?? "",
     備考: body["備考"] ?? "",
-  });
+  };
+  if (body["時刻"]) furikaeFields["時刻"] = body["時刻"];
+  const record = buildRecord(furikaeFields);
 
   const furikaeToken = [env.TOKEN_FURIKAE, env.TOKEN_SEITO_NEW].filter(Boolean).join(",");
   await kintoneUpdate(APP.FURIKAE, ticketId, record, furikaeToken);
