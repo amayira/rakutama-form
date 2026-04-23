@@ -166,7 +166,7 @@
   </main>
 
   <footer class="text-center py-8 text-xs text-gray-400">
-    <p>&copy; 2026 Alpha-Brain LLC.</p>
+    <p>&copy; 姫路楽珠そろばん教室 All Rights Reserved.</p>
   </footer>
 
   <script>
@@ -275,7 +275,9 @@
             if (jRes.ok && jData.success) {
               jData.classes.forEach(cls => {
                 const opt = document.createElement('option');
-                opt.value = cls.name;
+                const mId = String(cls.id).match(/(\d{2})(\d{2})$/);
+                const mName = String(cls.name).match(/(\d{1,2})時/);
+                opt.value = cls.startTime || (mId ? `${mId[1]}:${mId[2]}` : (mName ? `${mName[1].padStart(2,'0')}:00` : ''));
                 opt.textContent = cls.name;
                 timeSelect.appendChild(opt);
               });

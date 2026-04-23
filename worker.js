@@ -490,6 +490,7 @@ async function handleJugyo(params, env) {
   const classes = (data.records ?? []).map((rec) => ({
     id: rec["授業ID"]?.value ?? "",
     name: rec["授業名"]?.value ?? "",
+    startTime: rec["開始時刻"]?.value ?? "",
   }));
 
   return { success: true, classes };
