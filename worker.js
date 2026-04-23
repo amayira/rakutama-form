@@ -556,8 +556,9 @@ async function handleClassChange(body, env) {
     氏: body["氏"] ?? "",
     名: body["名"] ?? "",
     現在の授業ID: body["現在の授業ID"] ?? "",
+    変更種別: body["変更種別"] ?? "",
     変更希望内容: body["変更希望内容"] ?? "",
-    希望時期: body["希望時期"] ?? "",
+    希望変更時期: body["希望時期"] ?? "",
     備考: body["備考"] ?? "",
   });
 
