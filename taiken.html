@@ -159,7 +159,7 @@
           <!-- 住所 -->
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">住所 <span class="text-gray-400 text-xs font-normal">任意</span></label>
-            <input type="text" id="address" placeholder="例：東京都練馬区早宮1-1-1"
+            <input type="text" id="address" placeholder="例：姫路市岡田333-3"
               class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
           </div>
         </div>
@@ -176,9 +176,44 @@
             <select id="classroom" required
               class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 bg-white">
               <option value="">選択してください</option>
-              <option>早宮校</option>
-              <option>中村校</option>
-              <option>氷川台校</option>
+              <option>太子太田教室</option>
+              <option>浜の宮教室</option>
+              <option>安室教室</option>
+              <option>高浜教室</option>
+              <option>飾東教室</option>
+              <option>飾磨中島教室</option>
+              <option>個別</option>
+              <option>オンライン海外</option>
+              <option>オンライン国内</option>
+              <option>明石駅前教室</option>
+              <option>土山教室</option>
+              <option>住吉教室</option>
+              <option>大久保南教室</option>
+              <option>金ヶ崎教室</option>
+              <option>西明石教室</option>
+              <option>二階町教室</option>
+              <option>荒川本部教室</option>
+              <option>北条教室</option>
+              <option>花田教室</option>
+              <option>青山教室</option>
+              <option>手柄教室</option>
+              <option>八幡教室</option>
+              <option>糸引教室</option>
+              <option>広峰教室</option>
+              <option>英賀保教室</option>
+              <option>西飾磨教室</option>
+              <option>白浜教室</option>
+              <option>広畑教室</option>
+              <option>別所教室</option>
+              <option>鷺洲校</option>
+              <option>清水校</option>
+              <option>大淀校</option>
+              <option>中津校</option>
+              <option>扇町校</option>
+              <option>南森町校</option>
+              <option>蒲生四丁目校</option>
+              <option>関目高殿校</option>
+              <option>野田校</option>
             </select>
           </div>
 
@@ -278,26 +313,7 @@
   <script>
     const API_BASE = 'https://rakutama-kintone.k-ariyama.workers.dev';
 
-    const FALLBACK_JUGYO_BY_CLASSROOM = {
-      '早宮校': [
-        { name: '早宮校(火)16時クラス' },
-        { name: '早宮校(火)17時クラス' },
-        { name: '早宮校(金)16時クラス' },
-        { name: '早宮校(金)17時クラス' },
-      ],
-      '氷川台校': [
-        { name: '氷川台校(月)16時クラス' },
-        { name: '氷川台校(月)17時クラス' },
-        { name: '氷川台校(水)16時クラス' },
-        { name: '氷川台校(水)17時クラス' },
-      ],
-      '中村校': [
-        { name: '中村校(火)16時クラス' },
-        { name: '中村校(火)17時クラス' },
-        { name: '中村校(木)16時クラス' },
-        { name: '中村校(木)17時クラス' },
-      ],
-    };
+    const FALLBACK_JUGYO_BY_CLASSROOM = {};
 
     const JP_TO_DAY = { '日': 0, '月': 1, '火': 2, '水': 3, '木': 4, '金': 5, '土': 6 };
 

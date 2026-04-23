@@ -81,7 +81,7 @@
       <div class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
         <label class="block text-sm font-medium text-gray-700 mb-2">生徒番号</label>
         <div class="flex gap-2">
-          <input type="text" id="student-number" placeholder="例：A0000"
+          <input type="text" id="student-number" placeholder="例：0000"
             class="min-w-0 flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
           <button type="button" id="lookup-btn"
             class="flex-shrink-0 border-2 border-green-500 text-green-600 font-bold text-sm px-4 py-2 rounded-lg hover:bg-green-50 transition font-display flex items-center gap-2">
@@ -239,7 +239,7 @@
         document.getElementById('submit-hint').classList.add('hidden');
 
       } catch (err) {
-        lookupError.textContent = err.message || '検索中にエラーが発生しました。';
+        lookupError.textContent = err instanceof TypeError ? '通信エラーが発生しました。時間をおいて再度お試しください。' : (err.message || '検索中にエラーが発生しました。');
         lookupError.classList.remove('hidden');
       } finally {
         lookupBtn.disabled = false;
