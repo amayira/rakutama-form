@@ -273,12 +273,16 @@
             const jRes = await fetch(`${API_BASE}/api/jugyo?classroom=${encodeURIComponent(s.classroom)}`);
             const jData = await jRes.json();
             if (jRes.ok && jData.success) {
+              const seen = new Set();
               jData.classes.forEach(cls => {
-                const opt = document.createElement('option');
                 const mId = String(cls.id).match(/(\d{2})(\d{2})$/);
                 const mName = String(cls.name).match(/(\d{1,2})時/);
-                opt.value = cls.startTime || (mId ? `${mId[1]}:${mId[2]}` : (mName ? `${mName[1].padStart(2,'0')}:00` : ''));
-                opt.textContent = cls.name;
+                const timeVal = cls.startTime || (mId ? `${mId[1]}:${mId[2]}` : (mName ? `${mName[1].padStart(2,'0')}:00` : ''));
+                if (!timeVal || seen.has(timeVal)) return;
+                seen.add(timeVal);
+                const opt = document.createElement('option');
+                opt.value = timeVal;
+                opt.textContent = timeVal;
                 timeSelect.appendChild(opt);
               });
             }

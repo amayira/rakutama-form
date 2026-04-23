@@ -145,14 +145,17 @@ async function kintoneGetById(appId, recordId, token) {
  */
 function normalizeTime(val) {
   if (!val) return "";
-  // すでに HH:MM 形式なら OK（秒付きも許容）
-  if (/^\d{2}:\d{2}/.test(val)) return val.slice(0, 5);
-  // 授業ID末尾の HHMM 形式: "早宮校-火1700" → "17:00"
+  // HH:MM or HH:MM:SS → normalize to HH:MM:SS
+  if (/^\d{2}:\d{2}/.test(val)) {
+    const base = val.slice(0, 5);
+    return base + ":00";
+  }
+  // 授業ID末尾の HHMM 形式: "早宮校-火1700" → "17:00:00"
   const mId = String(val).match(/(\d{2})(\d{2})$/);
-  if (mId) return `${mId[1]}:${mId[2]}`;
-  // クラス名中の "16時" → "16:00"
+  if (mId) return `${mId[1]}:${mId[2]}:00`;
+  // クラス名中の "16時" → "16:00:00"
   const mName = String(val).match(/(\d{1,2})時/);
-  if (mName) return `${mName[1].padStart(2, "0")}:00`;
+  if (mName) return `${mName[1].padStart(2, "0")}:00:00`;
   return "";
 }
 
