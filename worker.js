@@ -499,6 +499,21 @@ async function handleNyukai(body, env, origin) {
 }
 
 /**
+ * GET /api/active-classrooms
+ * Returns list of classroom names that have at least one active class in 授業マスタ (App 6).
+ */
+async function handleActiveClassrooms(env) {
+  const query = `開講状況 in ("開講中") order by 教室名 asc limit 500`;
+  const data = await kintoneGet(APP.JUGYO, query, env.TOKEN_JUGYO);
+  const seen = new Set();
+  (data.records ?? []).forEach(rec => {
+    const name = rec["教室名"]?.value;
+    if (name) seen.add(name);
+  });
+  return { success: true, classrooms: [...seen] };
+}
+
+/**
  * GET /api/jugyo?classroom=教室名
  * Returns list of active classes for the given classroom from 授業マスタ (App 6).
  */
@@ -587,7 +602,9 @@ export default {
       const params = url.searchParams;
       let result;
       try {
-        if (path === "/api/jugyo") {
+        if (path === "/api/active-classrooms") {
+          result = await handleActiveClassrooms(env);
+        } else if (path === "/api/jugyo") {
           result = await handleJugyo(params, env);
         } else if (path === "/api/gakuhi") {
           result = await handleGakuhi(params, env);

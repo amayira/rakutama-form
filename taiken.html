@@ -229,7 +229,7 @@
           <!-- 希望日時 -->
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">体験希望日時 <span class="text-red-500">*</span></label>
-            <p class="text-xs text-gray-500 mb-3">希望教室を選ぶと、その教室の<span class="whitespace-nowrap">開講曜日・時間</span>だけが選べます（<strong>2026年6月以降</strong>の日付のみ）。第1希望・第2希望をそれぞれお選びください。</p>
+            <p class="text-xs text-gray-500 mb-3">希望教室を選ぶと、その教室の<span class="whitespace-nowrap">開講曜日・時間</span>だけが選べます（本日以降90日間）。第1希望・第2希望をそれぞれお選びください。</p>
             <div class="space-y-4">
               <div class="rounded-xl border border-gray-200 p-4 bg-gray-50/60">
                 <p class="text-sm font-bold text-gray-800 mb-3">第1希望</p>
@@ -335,11 +335,9 @@
     function buildDateSelectForSchedule(sel, allowedDays, noClassroomYet) {
       const wdays = ['日', '月', '火', '水', '木', '金', '土'];
       const daysAhead = 90;
-      const earliest = new Date(2026, 5, 1);
-      earliest.setHours(0, 0, 0, 0);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const base = today < earliest ? new Date(earliest) : new Date(today);
+      const base = new Date(today);
       sel.innerHTML = '';
       const ph = document.createElement('option');
       ph.value = '';
@@ -467,6 +465,19 @@
     });
 
     applyPreferenceDropdownsForSchedule(null, true);
+
+    // ページ読み込み時：授業マスタに1件もない教室を非表示
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/active-classrooms`);
+        const data = await res.json();
+        if (!res.ok || !data.success) return;
+        const active = new Set(data.classrooms);
+        document.querySelectorAll('#classroom option').forEach(opt => {
+          if (opt.value && !active.has(opt.value)) opt.style.display = 'none';
+        });
+      } catch { /* 取得失敗は無視 */ }
+    })();
 
     // Toggle 級・段 field
     document.querySelectorAll('input[name="experience"]').forEach(radio => {
