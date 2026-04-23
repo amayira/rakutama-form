@@ -20,6 +20,7 @@ const ALLOWED_ORIGINS = [
   "https://form.rakutama-tokyo.com",
   "https://rakutama-tokyo.com",
   "https://form.rakutama-soroban.com",
+  "http://form.rakutama-soroban.com",
   "https://amayira.github.io",
 ];
 
