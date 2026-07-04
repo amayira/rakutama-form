@@ -18,6 +18,7 @@ const API_BASE = 'https://rakutama-kintone.k-ariyama.workers.dev';
 // 加盟店フォルダ名 → kintone 組織コード
 const PATH_ORG_MAP = {
   koyomi: 'KOYOMI',
+  moderato: 'モデラート',
 };
 
 // URL 先頭のパスセグメント（/koyomi/taiken.html → "koyomi"）から組織を決める。
