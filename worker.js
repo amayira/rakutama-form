@@ -446,11 +446,11 @@ async function handleNyukai(body, env, origin) {
 
   // ── app 19 にレコード登録 ──────────────────────────────────────────────────
   const g = guardian ?? {};
-  const coupon = g["クーポンコード"] ?? "";
+  const referrer = g["紹介者"] ?? "";
   const sorobanOrders = Array.isArray(body["sorobanOrders"]) ? body["sorobanOrders"] : [];
   const userNotes = body["notes"] ?? "";
 
-  // 備考フィールドを組み立て（そろばん購入希望 → 備考 → クーポンコード）
+  // 備考フィールドを組み立て（そろばん購入希望 → 備考 → 紹介者）
   const bikoLines = [];
   if (student["そろばん経験"] === "あり") {
     const levelPart = student["級・段"] ? `（${student["級・段"]}）` : "";
@@ -460,7 +460,7 @@ async function handleNyukai(body, env, origin) {
     bikoLines.push(`【そろばん購入希望】\n${sorobanOrders.join("\n")}`);
   }
   if (userNotes) bikoLines.push(userNotes);
-  if (coupon) bikoLines.push(`クーポンコード：${coupon}`);
+  if (referrer) bikoLines.push(`紹介者：${referrer}`);
   const biko = bikoLines.join("\n\n");
 
   const record = buildRecord({
