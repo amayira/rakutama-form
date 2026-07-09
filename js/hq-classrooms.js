@@ -15,11 +15,12 @@
 //                       クラス未登録の行き止まり教室を隠す）。取得失敗時は絞らない。
 // ─────────────────────────────────────────────────────────────────────────────
 
-// 都道府県グループの表示順。ここに無い都道府県（＋空）は「その他」に集約して末尾。
+// 都道府県ごとにグループ化する。先頭の優先順（オンライン→兵庫県→大阪府）だけ固定し、
+// それ以外の都道府県はその後ろに続く（並び順は不問）。空欄は「その他」に集約。
 // 値は教室マスタ「都道府県」フィールドの実値に合わせる（兵庫県／大阪府と県・府つき）。
 const PREF_ORDER = ['オンライン', '兵庫県', '大阪府'];
 function prefRank(p) { const i = PREF_ORDER.indexOf(p); return i === -1 ? PREF_ORDER.length : i; }
-function prefLabel(p) { return PREF_ORDER.includes(p) ? p : 'その他'; }
+function prefLabel(p) { return p || 'その他'; }
 
 // 教室名 → 所属組織コード（入会の所属組織送信・月謝取得に使う）
 window.classroomOrgMap = window.classroomOrgMap || {};
