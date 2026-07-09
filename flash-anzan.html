@@ -232,8 +232,10 @@
         studentData = data;
         const s = data.student;
 
-        document.getElementById('info-classroom').textContent = s.classroom || '―';
-        document.getElementById('info-jugyo').textContent = s.jugyoIds && s.jugyoIds.length > 0 ? s.jugyoIds.join('、') : '―';
+        const lookupClassrooms = [...new Set((s.records || []).map(r => r.classroom).filter(Boolean))];
+        const lookupJugyo = (s.records || []).flatMap(r => r.jugyoIds || []);
+        document.getElementById('info-classroom').textContent = lookupClassrooms.join('・') || '―';
+        document.getElementById('info-jugyo').textContent = lookupJugyo.length > 0 ? lookupJugyo.join('、') : '―';
         studentInfo.classList.remove('hidden');
         document.getElementById('submit-btn').disabled = false;
         document.getElementById('submit-hint').classList.add('hidden');

@@ -270,8 +270,10 @@
         studentData = data;
         const s = data.student;
 
-        document.getElementById('info-classroom').textContent = s.classroom || '―';
-        document.getElementById('info-jugyo').textContent = s.jugyoIds && s.jugyoIds.length > 0 ? s.jugyoIds.join('、') : '―';
+        const lookupClassrooms = [...new Set((s.records || []).map(r => r.classroom).filter(Boolean))];
+        const lookupJugyo = (s.records || []).flatMap(r => r.jugyoIds || []);
+        document.getElementById('info-classroom').textContent = lookupClassrooms.join('・') || '―';
+        document.getElementById('info-jugyo').textContent = lookupJugyo.length > 0 ? lookupJugyo.join('、') : '―';
         studentInfo.classList.remove('hidden');
         document.getElementById('submit-btn').disabled = false;
         document.getElementById('submit-hint').classList.add('hidden');
@@ -329,6 +331,7 @@
       }
 
       const s = studentData.student;
+      const rec = (s.records && s.records[0]) || {};
       const submitBtn = document.getElementById('submit-btn');
       const submitText = document.getElementById('submit-text');
       const submitSpinner = document.getElementById('submit-spinner');
@@ -341,9 +344,9 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            生徒番号: studentNumber,
-            請求ID: s.billingId,
-            教室名: s.classroom,
+            生徒番号: rec.studentNumber || studentNumber,
+            請求ID: rec.billingId,
+            教室名: rec.classroom,
             氏: s.familyName,
             名: s.givenName,
             受験日: examDate,
