@@ -198,45 +198,8 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">希望教室 <span class="text-red-500">*</span></label>
             <select id="classroom" required
               class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 bg-white">
+              <!-- 教室は /api/all-classrooms から組織ごとに動的生成する -->
               <option value="">選択してください</option>
-              <option>太子太田教室</option>
-              <option>浜の宮教室</option>
-              <option>安室教室</option>
-              <option>高浜教室</option>
-              <option>飾東教室</option>
-              <option>飾磨中島教室</option>
-              <option>個別</option>
-              <option>オンライン海外</option>
-              <option>オンライン国内</option>
-              <option>明石駅前教室</option>
-              <option>土山教室</option>
-              <option>住吉教室</option>
-              <option>大久保南教室</option>
-              <option>金ヶ崎教室</option>
-              <option>西明石教室</option>
-              <option>二階町教室</option>
-              <option>荒川本部教室</option>
-              <option>北条教室</option>
-              <option>花田教室</option>
-              <option>青山教室</option>
-              <option>手柄教室</option>
-              <option>八幡教室</option>
-              <option>糸引教室</option>
-              <option>広峰教室</option>
-              <option>英賀保教室</option>
-              <option>西飾磨教室</option>
-              <option>白浜教室</option>
-              <option>広畑教室</option>
-              <option>別所教室</option>
-              <option>鷺洲校</option>
-              <option>清水校</option>
-              <option>大淀校</option>
-              <option>中津校</option>
-              <option>扇町校</option>
-              <option>南森町校</option>
-              <option>蒲生四丁目校</option>
-              <option>関目高殿校</option>
-              <option>野田校</option>
             </select>
           </div>
 
@@ -405,6 +368,8 @@
     <p>&copy; 姫路楽珠そろばん教室 All Rights Reserved.</p>
   </footer>
 
+  <!-- 教室ローダー（本部＋全FC加盟店を組織別に流し込む）。インライン処理より前に読み込む -->
+  <script src="/js/hq-classrooms.js"></script>
   <script>
     const API_BASE = 'https://rakutama-kintone.k-ariyama.workers.dev';
 
@@ -451,13 +416,39 @@
     }
 
 
-    // ── orgCode: determined by current domain ────────────────────────────────
+    // ── orgCode: ドメイン既定値（フォールバック）────────────────────────────
     const DOMAIN_ORG_MAP = {
       'form.rakutama-tokyo.com':   'アルファーブレイン',
       'rakutama-tokyo.com':        'アルファーブレイン',
       'form.rakutama-soroban.com': '本部',
     };
     const orgCode = DOMAIN_ORG_MAP[window.location.hostname] ?? 'アルファーブレイン';
+
+    // 実際の所属組織は「選択された教室」の組織で決まる（本部フォームは本部＋FC混在のため）。
+    // 月謝取得・所属組織送信はこの値を使う。教室未選択時はドメイン既定値。
+    function selectedOrg() {
+      const sel = document.getElementById('classroom');
+      const opt = sel && sel.selectedOptions && sel.selectedOptions[0];
+      return (opt && opt.dataset.org)
+        || (window.classroomOrgMap && window.classroomOrgMap[sel && sel.value])
+        || orgCode;
+    }
+
+    // 入会は本部の教室のみ。閉校＋授業マスタにクラス未登録の教室は非表示。
+    loadHqClassrooms('classroom', { onlyOrg: '本部', activeOnly: true });
+
+    // 教室ごとに表示できる月謝コースを制限する（本部の月謝マスタ命名規則に沿う）
+    //   個別          → 「個別」で始まるコース
+    //   オンライン海外 → 「オン海外」を含むコース
+    //   オンライン国内 → 「オン国内」を含むコース
+    //   その他の教室   → 「教室」を含むコース
+    function gakuhiAllowedFor(classroom, courseName) {
+      const name = courseName || '';
+      if (classroom === '個別') return name.startsWith('個別');
+      if (classroom === 'オンライン海外') return name.includes('オン海外');
+      if (classroom === 'オンライン国内') return name.includes('オン国内');
+      return name.includes('教室');
+    }
 
     // ── Toggle 級・段 field ──────────────────────────────────────────────────
     document.querySelectorAll('input[name="experience"]').forEach(radio => {
@@ -545,7 +536,7 @@
       gakuhiSpinner.classList.remove('hidden');
 
       try {
-        const res = await fetch(`${API_BASE}/api/gakuhi?orgCode=${encodeURIComponent(orgCode)}`);
+        const res = await fetch(`${API_BASE}/api/gakuhi?orgCode=${encodeURIComponent(selectedOrg())}`);
         const data = await res.json();
         if (!res.ok || !data.success) throw new Error(data.error || '月謝情報の取得に失敗しました');
 
@@ -553,12 +544,20 @@
           gakuhiError.textContent = '月謝コースが見つかりませんでした。';
           gakuhiError.classList.remove('hidden');
         } else {
-          data.fees.forEach(fee => {
-            const opt = document.createElement('option');
-            opt.value = fee.id;
-            opt.textContent = fee.name;
-            gakuhiSelect.appendChild(opt);
-          });
+          // 選択中の教室に応じて表示する月謝コースを絞る
+          const classroom = document.getElementById('classroom').value;
+          const fees = data.fees.filter(fee => gakuhiAllowedFor(classroom, fee.name));
+          if (fees.length === 0) {
+            gakuhiError.textContent = 'この教室に対応する月謝コースが見つかりませんでした。';
+            gakuhiError.classList.remove('hidden');
+          } else {
+            fees.forEach(fee => {
+              const opt = document.createElement('option');
+              opt.value = fee.id;
+              opt.textContent = fee.name;
+              gakuhiSelect.appendChild(opt);
+            });
+          }
         }
       } catch (err) {
         gakuhiError.textContent = err.message || '月謝情報の取得中にエラーが発生しました。';
@@ -636,6 +635,7 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            所属組織: selectedOrg(), // 選択教室の組織（worker はこれで所属組織を打つ＝加盟店へ通知が飛ぶ）
             isSibling: false,
             sorobanOrders,
             notes,
