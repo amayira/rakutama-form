@@ -6,12 +6,20 @@
 //     - 体験：教室名ルックアップで所属組織が自動転記されるため org 送信は不要
 //   この方式なら、新しい教室・加盟店は教室マスタに登録するだけでフォームに反映される。
 //
+//   表示は「都道府県」ごとに <optgroup> でまとめる（オンライン→兵庫→大阪→その他の順）。
+//   都道府県は教室マスタの「都道府県」フィールド由来（/api/all-classrooms の pref）。
+//
 //   loadHqClassrooms(selectId, opts)
-//     opts.onlyOrg    … 指定した組織コードの教室だけを平坦に表示（例：入会は本部のみ）。
+//     opts.onlyOrg    … 指定した組織コードの教室だけに絞る（例：入会は本部のみ）。
 //     opts.activeOnly … 授業マスタに「開講中」クラスがある教室だけに絞る（入会用。
 //                       クラス未登録の行き止まり教室を隠す）。取得失敗時は絞らない。
-//     省略時 … 全組織を <optgroup> でまとめて表示（本部を先頭・その下にFC加盟店。体験用）。
 // ─────────────────────────────────────────────────────────────────────────────
+
+// 都道府県グループの表示順。ここに無い都道府県（＋空）は「その他」に集約して末尾。
+// 値は教室マスタ「都道府県」フィールドの実値に合わせる（兵庫県／大阪府と県・府つき）。
+const PREF_ORDER = ['オンライン', '兵庫県', '大阪府'];
+function prefRank(p) { const i = PREF_ORDER.indexOf(p); return i === -1 ? PREF_ORDER.length : i; }
+function prefLabel(p) { return PREF_ORDER.includes(p) ? p : 'その他'; }
 
 // 教室名 → 所属組織コード（入会の所属組織送信・月謝取得に使う）
 window.classroomOrgMap = window.classroomOrgMap || {};
@@ -62,30 +70,20 @@ async function loadHqClassrooms(selectId, opts) {
     // 成功時のみ選択肢を差し替える（失敗時はプレースホルダのまま＝誤った教室を出さない）
     sel.innerHTML = '<option value="">選択してください</option>';
 
-    if (onlyOrg) {
-      // 単一組織：平坦に表示
-      items.forEach((c) => sel.appendChild(makeOption(c)));
-      return;
-    }
-
-    // 全組織：組織ごとに <optgroup> でまとめる（本部を先頭に固定）
-    const groups = new Map(); // orgCode → { label, items: [] }
+    // 都道府県ごとに <optgroup> でまとめる（オンライン→兵庫→大阪→その他）
+    const groups = new Map(); // ラベル → { rank, items: [] }
     items.forEach((c) => {
-      const code = c.org || 'その他';
-      if (!groups.has(code)) groups.set(code, { label: c.orgName || code, items: [] });
-      groups.get(code).items.push(c);
+      const label = prefLabel(c.pref);
+      if (!groups.has(label)) groups.set(label, { rank: prefRank(c.pref), items: [] });
+      groups.get(label).items.push(c);
     });
-    const order = [...groups.keys()].sort((a, b) => {
-      if (a === '本部') return -1;
-      if (b === '本部') return 1;
-      return 0;
-    });
-    order.forEach((code) => {
-      const g = groups.get(code);
-      const og = document.createElement('optgroup');
-      og.label = g.label;
-      g.items.forEach((c) => og.appendChild(makeOption(c)));
-      sel.appendChild(og);
-    });
+    [...groups.keys()]
+      .sort((a, b) => groups.get(a).rank - groups.get(b).rank)
+      .forEach((label) => {
+        const og = document.createElement('optgroup');
+        og.label = label;
+        groups.get(label).items.forEach((c) => og.appendChild(makeOption(c)));
+        sel.appendChild(og);
+      });
   } catch { /* 取得失敗時はプレースホルダのまま */ }
 }
