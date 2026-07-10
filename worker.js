@@ -337,6 +337,36 @@ const MAIL_FROM = "楽珠そろばん教室 <info@rakutama-tokyo.com>";
 const MAIL_LINE = "https://lin.ee/oW7wspr";
 const MAIL_ADDR = "info@rakutama-tokyo.com";
 
+// 体験・入会の控え／障害通知の宛先（本部・全組織分をここに集約）
+const ADMIN_EMAIL = "k-ariyama@alpha-brain.jp";
+
+/**
+ * 管理者宛の控え・障害通知メール（テキストのみ）。
+ * fields = { ラベル: 値, ... }（空値の行は省略）。
+ * 申込処理を巻き込まないよう、この関数は絶対に throw しない。
+ */
+async function sendAdminEmail({ subject, intro, fields, env }) {
+  try {
+    if (!env.RESEND_API_KEY) return;
+    const now = new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
+    const rows = Object.entries(fields ?? {})
+      .filter(([, v]) => v != null && String(v).trim() !== "")
+      .map(([k, v]) => `■ ${k}：${v}`)
+      .join("\n");
+    const text = `${intro}\n\n受付日時：${now}\n\n${rows}\n`;
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ from: MAIL_FROM, to: [ADMIN_EMAIL], subject, text }),
+    });
+  } catch (e) {
+    console.error("管理者メール送信エラー:", e);
+  }
+}
+
 // 受付完了メールは自社（東京直営）のみ送信する。FC加盟店・本部には送らない。
 const MAIL_ORG = "アルファーブレイン";
 
@@ -441,6 +471,19 @@ async function sendStudentReceipt({ studentNumber, familyName, givenName, subjec
  * Creates a record in 体験参加名簿 (App 17).
  */
 async function handleTaiken(body, env, origin) {
+  // ── 必須項目チェック ─────────────────────────────────────────────────────
+  // ここに追加する項目は「東京直営＋FC加盟店の全 taiken フォームが必ず送るもの」に限ること
+  // （worker は全組織共通のため、一部フォームにしかない項目を必須にすると他組織の申込が全滅する）。
+  const requiredTaiken = ["氏", "名", "メールアドレス", "教室名", "希望日時"];
+  const missingTaiken = requiredTaiken.filter((f) => !String(body[f] ?? "").trim());
+  if (missingTaiken.length > 0) {
+    return {
+      success: false,
+      error: `必須項目が未入力です：${missingTaiken.join("・")}。お手数ですが入力のうえ再度送信してください。`,
+      status: 400,
+    };
+  }
+
   // 教室名はルックアップ型のため、TOKEN_TAIKENとTOKEN_KYOSHITSUを両方渡して
   // 教室マスタへの閲覧権限を付与したマルチトークンで送信する
   const token = env.TOKEN_KYOSHITSU
@@ -454,7 +497,7 @@ async function handleTaiken(body, env, origin) {
   if (referrer) bikoLines.push(`紹介者：${referrer}`);
   const biko = bikoLines.join("\n\n");
 
-  const record = buildRecord({
+  const fields = {
     氏: body["氏"] ?? "",
     名: body["名"] ?? "",
     フリガナ: body["フリガナ"] ?? "",
@@ -467,9 +510,30 @@ async function handleTaiken(body, env, origin) {
     教室名: body["教室名"] ?? "",
     希望日時: body["希望日時"] ?? "",
     備考: biko,
-  });
+  };
+  const record = buildRecord(fields);
 
-  await kintonePost(APP.TAIKEN, record, token);
+  // kintone登録に失敗しても申込内容がメールに残るよう、失敗時は管理者へ全文通知してから
+  // エラーを返す（リード取りこぼし防止のセーフティネット）
+  try {
+    await kintonePost(APP.TAIKEN, record, token);
+  } catch (err) {
+    await sendAdminEmail({
+      subject: `【要対応】体験申込のkintone登録失敗：${fields["氏"]} ${fields["名"]}（${fields["教室名"]}）`,
+      intro: `体験申込のkintone登録（App17）に失敗しました。レコードは作成されていません。\n以下の内容を元に手動で登録・連絡してください。\n\nエラー内容：${err.message}`,
+      fields,
+      env,
+    });
+    throw err;
+  }
+
+  // 成功時の控えメール（全組織分を本部へ。失敗しても申込自体はエラーにしない）
+  await sendAdminEmail({
+    subject: `【控え】体験申込：${fields["氏"]} ${fields["名"]}（${fields["教室名"]}）`,
+    intro: "体験申込を受け付け、kintone（App17）に登録しました。",
+    fields,
+    env,
+  });
 
   // kintone登録成功後に確認メール送信（失敗しても申込自体はエラーにしない）
   // 自社（東京直営）のみ送信。加盟店・本部（form.rakutama-soroban.com）には送らない。
@@ -799,7 +863,7 @@ async function handleNyukai(body, env, origin) {
   if (referrer) bikoLines.push(`紹介者：${referrer}`);
   const biko = bikoLines.join("\n\n");
 
-  const record = buildRecord({
+  const fields = {
     生徒番号: tempStudentId,
     氏: student["氏"] ?? "",
     名: student["名"] ?? "",
@@ -822,14 +886,39 @@ async function handleNyukai(body, env, origin) {
     住所: g["住所"] ?? "",
     口座名義人: g["口座名義人"] ?? "",
     備考: biko,
-  });
+  };
+  const record = buildRecord(fields);
 
   // 所属組織フィールド（組織選択型）
   record["所属組織"] = { value: [{ code: orgCode }] };
 
+  // 控え・障害通知メール用（fields には kintone用の組織フィールドが無いので別途足す）
+  const mailFields = { 所属組織: orgCode, ...fields };
+
   const token = [env.TOKEN_SEITO_NEW, env.TOKEN_KYOSHITSU, env.TOKEN_GAKUHI]
     .filter(Boolean).join(",");
-  await kintonePost(APP.SEITO_NEW, record, token);
+
+  // kintone登録に失敗しても申込内容がメールに残るよう、失敗時は管理者へ全文通知してから
+  // エラーを返す（リード取りこぼし防止のセーフティネット）
+  try {
+    await kintonePost(APP.SEITO_NEW, record, token);
+  } catch (err) {
+    await sendAdminEmail({
+      subject: `【要対応】入会申込のkintone登録失敗：${fields["氏"]} ${fields["名"]}（${fields["教室名"]}）`,
+      intro: `入会申込のkintone登録（App19）に失敗しました。レコードは作成されていません。\n以下の内容を元に手動で登録・連絡してください。\n\nエラー内容：${err.message}`,
+      fields: mailFields,
+      env,
+    });
+    throw err;
+  }
+
+  // 成功時の控えメール（全組織分を本部へ。失敗しても申込自体はエラーにしない）
+  await sendAdminEmail({
+    subject: `【控え】入会申込：${fields["氏"]} ${fields["名"]}（${fields["教室名"]}）`,
+    intro: "入会申込を受け付け、kintone（App19）に登録しました。",
+    fields: mailFields,
+    env,
+  });
 
   // 入会受付メール（東京直営のみ。加盟店は運営会社・連絡先が異なるため送らない）
   try {
