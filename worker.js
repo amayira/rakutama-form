@@ -15,6 +15,7 @@ const APP = {
   SEITO_NEW: 19,   // 生徒名簿（新・統合）
   SONOTA: 16,      // その他請求
   KYOSHITSU: 5,    // 教室マスタ
+  FC_LEAD: 20,     // FC説明会リード（加盟店募集サイト）
 };
 
 const ALLOWED_ORIGINS = [
@@ -22,6 +23,9 @@ const ALLOWED_ORIGINS = [
   "https://rakutama-tokyo.com",
   "https://form.rakutama-soroban.com",
   "https://amayira.github.io",
+  "https://fc.rakutama-soroban.com",        // FC加盟店募集サイト（サブドメイン候補1）
+  "https://franchise.rakutama-soroban.com", // FC加盟店募集サイト（サブドメイン候補2）
+  "http://localhost:8930",                  // FC募集サイト ローカル開発用
 ];
 
 // ドメインごとの所属組織コード（kintoneシステム管理→組織のコード）
@@ -684,24 +688,23 @@ async function handleAbsenceCount(params, env) {
 }
 
 /**
- * GET /api/furikae-tickets?studentNumber=A0000&date=2026-04-17
- * Returns available 振替tickets from App 14 that cover the given date.
+ * GET /api/furikae-tickets?studentNumber=A0000
+ * Returns unused, not-yet-expired 振替tickets from App 14 for the student
+ * (振替受講日が未確定かつ振替期日_終_が本日以降のもの)。
+ * 振替受講日を選ぶ前にチケットを選択できるよう、特定日付での絞り込みは行わない。
  */
 async function handleFurikaeTickets(params, env) {
   const studentNumber = params.get("studentNumber");
-  const date = params.get("date");
-  if (!studentNumber || !date) {
-    return { success: false, error: "studentNumber と date は必須です", status: 400 };
+  if (!studentNumber) {
+    return { success: false, error: "studentNumber は必須です", status: 400 };
   }
 
   // メイン番号（A0001）＋サブ番号（A0001-2 など）の両チケットを取得
   const sn = escapeQueryValue(studentNumber);
-  const dt = escapeQueryValue(date);
   const conditions = [
     `(生徒番号 = "${sn}" or 生徒番号 like "${sn}-%")`,
     `振替受講日 = ""`,
-    `振替期日_始_ <= "${dt}"`,
-    `振替期日_終_ >= "${dt}"`,
+    `振替期日_終_ >= TODAY()`,
   ].join(" and ");
   const query = `${conditions} order by 欠席日 asc limit 50`;
 
@@ -965,20 +968,28 @@ async function handleJugyo(params, env) {
 }
 
 /**
+ * 授業マスタ(App6)に「開講中」クラスが1件以上ある教室名の Set を返す。
+ * 教室マスタに登録済みでも授業が全て休講なら、この Set に含まれない
+ * ＝フォームの教室選択から除外できる。
+ */
+async function fetchActiveClassroomNames(env) {
+  const query = `開講状況 in ("開講中") order by 教室名 asc limit 500`;
+  const data = await kintoneGet(APP.JUGYO, query, env.TOKEN_JUGYO);
+
+  return new Set(
+    (data.records ?? [])
+      .map((rec) => rec["教室名"]?.value ?? "")
+      .filter(Boolean)
+  );
+}
+
+/**
  * GET /api/active-classrooms
  * 授業マスタ(App6)に「開講中」クラスが1件以上ある教室名の一覧を返す。
  * 本部フォームのハードコード教室リストから、閉校（＝開講中クラスなし）を隠す用。
  */
 async function handleActiveClassrooms(env) {
-  const query = `開講状況 in ("開講中") order by 教室名 asc limit 500`;
-  const data = await kintoneGet(APP.JUGYO, query, env.TOKEN_JUGYO);
-
-  const classrooms = [...new Set(
-    (data.records ?? [])
-      .map((rec) => rec["教室名"]?.value ?? "")
-      .filter(Boolean)
-  )];
-
+  const classrooms = [...await fetchActiveClassroomNames(env)];
   return { success: true, classrooms };
 }
 
@@ -990,10 +1001,15 @@ async function handleActiveClassrooms(env) {
  */
 async function handleAllClassrooms(env) {
   const query = `開校日 != "" order by レコード番号 asc limit 500`;
-  const data = await kintoneGet(APP.KYOSHITSU, query, env.TOKEN_KYOSHITSU);
+  const [data, activeNames] = await Promise.all([
+    kintoneGet(APP.KYOSHITSU, query, env.TOKEN_KYOSHITSU),
+    fetchActiveClassroomNames(env),
+  ]);
 
   const classrooms = (data.records ?? [])
     .filter((rec) => !String(rec["開校状況"]?.value ?? "").includes("閉"))
+    // 授業マスタに開講中クラスが無い教室（全休講の準備中校など）は出さない
+    .filter((rec) => activeNames.has(rec["教室名"]?.value ?? ""))
     .map((rec) => ({
       name: rec["教室名"]?.value ?? "",
       org: rec["組織選択"]?.value?.[0]?.code ?? "",
@@ -1020,10 +1036,15 @@ async function handleClassrooms(params, env) {
   // 教室マスタは全組織共通（関西等も含む）のため組織選択で絞る。
   // 開校日が未入力の教室（開校日未定の準備中など）はフォームに出さない。
   const query = `組織選択 in ("${escapeQueryValue(orgCode)}") and 開校日 != "" order by レコード番号 asc limit 100`;
-  const data = await kintoneGet(APP.KYOSHITSU, query, env.TOKEN_KYOSHITSU);
+  const [data, activeNames] = await Promise.all([
+    kintoneGet(APP.KYOSHITSU, query, env.TOKEN_KYOSHITSU),
+    fetchActiveClassroomNames(env),
+  ]);
 
   const classrooms = (data.records ?? [])
     .filter((rec) => !String(rec["開校状況"]?.value ?? "").includes("閉"))
+    // 授業マスタに開講中クラスが無い教室（全休講の準備中校など）は出さない
+    .filter((rec) => activeNames.has(rec["教室名"]?.value ?? ""))
     .map((rec) => ({
       name: rec["教室名"]?.value ?? "",
       openDate: rec["開校日"]?.value ?? "",
@@ -1179,14 +1200,19 @@ async function handleStaffSeito(params, env) {
 }
 
 /**
- * GET /api/staff/kesseki?school=all|早宮校|氷川台校|中村校
+ * GET /api/staff/kesseki?school=all|早宮校|氷川台校|中村校&tab=kesseki|furikae
  * Returns 振替管理 (App 14) records where 欠席日 >= TODAY() or 振替受講日 >= TODAY().
+ * 欠席タブ(tab=kesseki)は教室名（ホーム教室）で絞り込み、
+ * 振替タブ(tab=furikae)は振替教室名（振替先教室）で絞り込む
+ * （出席する側の先生が知りたいのは振替先教室のため）。
  * Fields: 生徒番号, 氏, 名, 教室名, 欠席日, 振替受講日, 振替教室名, 振替期日_終_, 時刻
  */
 async function handleStaffKesseki(params, env) {
   const school = params.get("school") ?? "all";
+  const tab = params.get("tab") ?? "kesseki";
+  const schoolField = tab === "furikae" ? "振替教室名" : "教室名";
   const conditions = [`(欠席日 >= TODAY() or 振替受講日 >= TODAY())`];
-  if (school !== "all") conditions.unshift(`教室名 = "${escapeQueryValue(school)}"`);
+  if (school !== "all") conditions.unshift(`${schoolField} = "${escapeQueryValue(school)}"`);
   const query = `${conditions.join(" and ")} order by 欠席日 asc limit 500`;
 
   const data = await kintoneGet(APP.FURIKAE, query, env.TOKEN_FURIKAE);
@@ -1284,6 +1310,34 @@ async function handleStaffStats(env) {
     breakeven: BREAKEVEN_TOTAL,
     monthly,
   };
+}
+
+// ─── FC加盟店募集サイト: 説明会リード登録（App 20） ──────────────────────────
+// fc.rakutama-soroban.com のフォームから送信されるリードを App20 に追加する。
+// フィールドコードはフォームの name 属性と1:1（rakutama-fc-site/README.md 参照）。
+
+async function handleFcLead(body, env) {
+  for (const f of ["name", "email", "tel"]) {
+    if (!body[f] || !String(body[f]).trim()) {
+      return { success: false, error: `必須項目が未入力です（${f}）`, status: 400 };
+    }
+  }
+
+  const FIELD_CODES = [
+    "persona", "name", "email", "tel", "status", "experience",
+    "area", "referrer", "message", "page",
+    "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term",
+  ];
+  const fields = {};
+  for (const code of FIELD_CODES) {
+    const v = body[code];
+    if (v != null && String(v).trim() !== "") {
+      fields[code] = String(v).slice(0, 2000);
+    }
+  }
+
+  const result = await kintonePost(APP.FC_LEAD, buildRecord(fields), env.TOKEN_FC_LEAD);
+  return { success: true, id: result.id };
 }
 
 // ─── Main fetch handler ──────────────────────────────────────────────────────
@@ -1396,6 +1450,9 @@ export default {
           break;
         case "/api/staff/auth":
           result = await handleStaffAuth(body, env);
+          break;
+        case "/api/fc-lead":
+          result = await handleFcLead(body, env);
           break;
         default:
           return errorResponse("Not Found", 404, origin);
