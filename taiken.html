@@ -190,8 +190,8 @@
           <!-- 希望日時 -->
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">体験希望日時 <span class="text-red-500">*</span></label>
-            <p class="text-xs text-gray-500 mb-3">希望教室を選ぶと、その教室の<span class="whitespace-nowrap">開講曜日・時間</span>だけが選べます（本日以降90日間）。第1希望・第2希望をそれぞれお選びください。</p>
-            <div class="space-y-4">
+            <p id="pref-slots-hint" class="text-xs text-gray-500 mb-3">希望教室を選ぶと、その教室の<span class="whitespace-nowrap">開講曜日・時間</span>だけが選べます（本日以降90日間）。第1希望・第2希望をそれぞれお選びください。</p>
+            <div id="pref-slots" class="space-y-4">
               <div class="rounded-xl border border-gray-200 p-4 bg-gray-50/60">
                 <p class="text-sm font-bold text-gray-800 mb-3">第1希望</p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -230,6 +230,11 @@
                   </div>
                 </div>
               </div>
+            </div>
+            <div id="pref-freetext-wrap" class="hidden">
+              <p class="text-xs text-gray-500 mb-2">マンツーマンは決まった開講日時がないため、ご希望の曜日・時間帯を自由にご記入ください。</p>
+              <textarea id="pref-freetime" rows="3" placeholder="例：平日の16時〜18時の間でご相談したいです"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 resize-y"></textarea>
             </div>
           </div>
 
@@ -350,7 +355,34 @@
       buildTimeSelectForChosenDate(document.getElementById('pref2-time'), lastJugyoByDay, '');
     }
 
+    // マンツーマンは固定の開講曜日・時間がないため、希望日時プルダウンの代わりに自由記述欄を出す
+    const FREETEXT_SCHEDULE_CLASSROOMS = new Set(['マンツーマン']);
+
+    function isFreetextScheduleMode() {
+      const wrap = document.getElementById('pref-freetext-wrap');
+      return !!wrap && !wrap.classList.contains('hidden');
+    }
+
+    function toggleFreetextSchedule(isFreetext) {
+      const slots = document.getElementById('pref-slots');
+      const hint = document.getElementById('pref-slots-hint');
+      const freetextWrap = document.getElementById('pref-freetext-wrap');
+      if (!slots || !freetextWrap) return;
+      slots.classList.toggle('hidden', isFreetext);
+      if (hint) hint.classList.toggle('hidden', isFreetext);
+      freetextWrap.classList.toggle('hidden', !isFreetext);
+      ['pref1-date', 'pref1-time', 'pref2-date', 'pref2-time'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.required = !isFreetext;
+      });
+      const freetimeEl = document.getElementById('pref-freetime');
+      if (freetimeEl) freetimeEl.required = isFreetext;
+    }
+
     function mergePreferredDatetimeForKintone() {
+      if (isFreetextScheduleMode()) {
+        return document.getElementById('pref-freetime').value.trim();
+      }
       const d1 = document.getElementById('pref1-date').value.trim();
       const t1 = document.getElementById('pref1-time').value.trim();
       const d2 = document.getElementById('pref2-date').value.trim();
@@ -392,7 +424,17 @@
       const list = document.getElementById('schedule-list');
 
       list.innerHTML = '';
+
+      const isFreetext = FREETEXT_SCHEDULE_CLASSROOMS.has(classroom);
+      toggleFreetextSchedule(isFreetext);
+
       if (!classroom) {
+        section.classList.add('hidden');
+        applyPreferenceDropdownsForSchedule(null, true);
+        return;
+      }
+
+      if (isFreetext) {
         section.classList.add('hidden');
         applyPreferenceDropdownsForSchedule(null, true);
         return;
@@ -471,10 +513,14 @@
       if (!givenName) errors.push('名をご入力ください');
       if (!email) errors.push('メールアドレスをご入力ください');
       if (!classroom) errors.push('希望教室を選択してください');
-      if (!pref1d || !pref1t) errors.push('第1希望の日付・時間を選択してください');
-      if (!pref2d || !pref2t) errors.push('第2希望の日付・時間を選択してください');
-      if (pref1d && pref1t && pref2d && pref2t && pref1d === pref2d && pref1t === pref2t) {
-        errors.push('第1希望と第2希望は異なる日時をお選びください');
+      if (isFreetextScheduleMode()) {
+        if (!preferredDatetime) errors.push('体験希望日時をご入力ください');
+      } else {
+        if (!pref1d || !pref1t) errors.push('第1希望の日付・時間を選択してください');
+        if (!pref2d || !pref2t) errors.push('第2希望の日付・時間を選択してください');
+        if (pref1d && pref1t && pref2d && pref2t && pref1d === pref2d && pref1t === pref2t) {
+          errors.push('第1希望と第2希望は異なる日時をお選びください');
+        }
       }
 
       if (errors.length > 0) {
