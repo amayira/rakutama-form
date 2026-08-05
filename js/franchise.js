@@ -19,6 +19,7 @@ const API_BASE = 'https://rakutama-kintone.k-ariyama.workers.dev';
 const PATH_ORG_MAP = {
   koyomi: 'KOYOMI',
   moderato: 'モデラート',
+  crele: '株式会社CReLe',
 };
 
 // URL 先頭のパスセグメント（/koyomi/taiken.html → "koyomi"）から組織を決める。
