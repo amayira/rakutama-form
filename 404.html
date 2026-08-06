@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow">
+  <title>読み込み中... | 楽珠そろばん教室</title>
+</head>
+<body>
+  <p id="status" style="font-family: sans-serif; text-align: center; margin-top: 3em; color: #888;">読み込み中...</p>
+  <script>
+    // 物理フォルダを持たない新加盟店（kintone 教室マスタの form_url で登録）を
+    // 動的に解決する。/api/franchises で該当スラッグが見つかれば
+    // _template/ 配下の対応ページを差し込んで表示する。
+    // レガシー加盟店（koyomi/moderato/crele など物理フォルダがある場合）は
+    // GitHub Pages が直接ファイルを返すため、この 404.html は発火しない。
+    (async () => {
+      const API_BASE = 'https://rakutama-kintone.k-ariyama.workers.dev';
+      const statusEl = document.getElementById('status');
+      const segs = location.pathname.split('/').filter(Boolean);
+      const slug = segs[0] || '';
+      const page = segs[1] || 'index.html';
+
+      try {
+        const res = await fetch(`${API_BASE}/api/franchises`);
+        const data = await res.json();
+        const match = data.success && Array.isArray(data.franchises)
+          ? data.franchises.find(f => f.slug === slug)
+          : null;
+
+        if (!match) {
+          document.title = '404 Not Found | 楽珠そろばん教室';
+          statusEl.textContent = 'お探しのページが見つかりませんでした。';
+          return;
+        }
+
+        const pageRes = await fetch(`/_template/${page}`);
+        if (!pageRes.ok) {
+          statusEl.textContent = 'お探しのページが見つかりませんでした。';
+          return;
+        }
+        const html = await pageRes.text();
+
+        // _template/ 側の <script src="/js/franchise.js"> がこれを見て組織を解決する
+        window.__FRANCHISE_OVERRIDE__ = match;
+        document.open();
+        document.write(html);
+        document.close();
+      } catch (e) {
+        statusEl.textContent = '通信エラーが発生しました。時間をおいて再度お試しください。';
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -15,19 +15,31 @@
 
 const API_BASE = 'https://rakutama-kintone.k-ariyama.workers.dev';
 
-// 加盟店フォルダ名 → kintone 組織コード
+// 加盟店フォルダ名 → kintone 組織コード（レガシー：物理フォルダを複製した加盟店）
 const PATH_ORG_MAP = {
   koyomi: 'KOYOMI',
   moderato: 'モデラート',
   crele: '株式会社CReLe',
 };
 
+// 物理フォルダを持たない新加盟店は 404.html が /api/franchises と照合したうえで
+// { slug, orgCode, displayName } を window.__FRANCHISE_OVERRIDE__ にセットしてから
+// _template/ の中身を差し込む。ここではそれを最優先で使う。
+const FRANCHISE_OVERRIDE = window.__FRANCHISE_OVERRIDE__ || null;
+
 // URL 先頭のパスセグメント（/koyomi/taiken.html → "koyomi"）から組織を決める。
 // 該当なし（＝ルート直下の従来フォーム）は本部にフォールバック。
 const ORG_CODE = (() => {
+  if (FRANCHISE_OVERRIDE) return FRANCHISE_OVERRIDE.orgCode;
   const seg = location.pathname.split('/').filter(Boolean)[0] || '';
   return PATH_ORG_MAP[seg] || '本部';
 })();
+
+// _template/ 経由（404.html動的解決）の場合、フッターの運営会社名プレースホルダに差し込む
+if (FRANCHISE_OVERRIDE) {
+  const operatorEl = document.getElementById('operator-name');
+  if (operatorEl) operatorEl.textContent = FRANCHISE_OVERRIDE.displayName || FRANCHISE_OVERRIDE.orgCode;
+}
 
 // 教室名 → 開校日（YYYY-MM-DD）。開校日より前の日付をフォーム側でクランプする用。
 window.classroomOpenDates = {};
