@@ -429,9 +429,22 @@
       });
     });
 
+    // 住所欄のプレースホルダを選択教室の所在地に合わせる（未選択時はデフォルトに戻す）
+    const addressInput = document.getElementById('address');
+    const defaultAddressPlaceholder = addressInput.placeholder;
+    function updateAddressPlaceholder(classroom) {
+      const addr = window.classroomAddresses && window.classroomAddresses[classroom];
+      if (addr && (addr.pref || addr.address)) {
+        addressInput.placeholder = `例：${addr.pref}${addr.address}1-2-3`;
+      } else {
+        addressInput.placeholder = defaultAddressPlaceholder;
+      }
+    }
+
     // ── 希望教室 → fetch jugyo list (チェックボックス形式) ───────────────────
     document.getElementById('classroom').addEventListener('change', async function () {
       const classroom = this.value;
+      updateAddressPlaceholder(classroom);
       const jugyoSection = document.getElementById('jugyo-section');
       const jugyoCheckboxes = document.getElementById('jugyo-checkboxes');
       const jugyoSpinner = document.getElementById('jugyo-spinner');

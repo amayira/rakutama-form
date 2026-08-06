@@ -43,6 +43,8 @@ if (FRANCHISE_OVERRIDE) {
 
 // 教室名 → 開校日（YYYY-MM-DD）。開校日より前の日付をフォーム側でクランプする用。
 window.classroomOpenDates = {};
+// 教室名 → { pref, address }。住所入力欄のプレースホルダを教室所在地に合わせる用。
+window.classroomAddresses = {};
 
 // ── 教室一覧を教室マスタ(App5)から組織別に動的取得して <select> に流し込む ──
 // 成功時のみ選択肢を差し替える。失敗時はプレースホルダのまま（誤った教室は出さない）。
@@ -55,11 +57,13 @@ async function loadClassroomsInto(selectId) {
     if (!res.ok || !data.success || !Array.isArray(data.classrooms)) return;
     sel.innerHTML = '<option value="">選択してください</option>';
     window.classroomOpenDates = {};
+    window.classroomAddresses = {};
     data.classrooms.forEach((c) => {
       const opt = document.createElement('option');
       opt.textContent = c.name;
       sel.appendChild(opt);
       if (c.openDate) window.classroomOpenDates[c.name] = c.openDate;
+      if (c.pref || c.address) window.classroomAddresses[c.name] = { pref: c.pref || '', address: c.address || '' };
     });
   } catch { /* 取得失敗時はプレースホルダのまま */ }
 }

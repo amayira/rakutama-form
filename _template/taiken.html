@@ -296,12 +296,12 @@
       return byDay;
     }
 
-    function buildDateSelectForSchedule(sel, allowedDays, noClassroomYet) {
+    function buildDateSelectForSchedule(sel, allowedDays, noClassroomYet, minDate) {
       const wdays = ['日', '月', '火', '水', '木', '金', '土'];
       const daysAhead = 90;
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const base = new Date(today);
+      const base = (minDate && minDate > today) ? minDate : new Date(today);
       sel.innerHTML = '';
       const ph = document.createElement('option');
       ph.value = '';
@@ -345,8 +345,12 @@
     function applyPreferenceDropdownsForSchedule(byDay, noClassroomYet) {
       lastJugyoByDay = (byDay && byDay.size) ? byDay : null;
       const allowed = lastJugyoByDay ? new Set(lastJugyoByDay.keys()) : null;
-      buildDateSelectForSchedule(document.getElementById('pref1-date'), allowed, noClassroomYet);
-      buildDateSelectForSchedule(document.getElementById('pref2-date'), allowed, noClassroomYet);
+      // 選択中の教室の開校日より前は選択不可にする（未開校の教室で過去日を選べてしまう不具合対策）
+      const currentClassroom = document.getElementById('classroom').value;
+      const openDateStr = window.classroomOpenDates && window.classroomOpenDates[currentClassroom];
+      const minDate = openDateStr ? new Date(openDateStr + 'T00:00:00') : null;
+      buildDateSelectForSchedule(document.getElementById('pref1-date'), allowed, noClassroomYet, minDate);
+      buildDateSelectForSchedule(document.getElementById('pref2-date'), allowed, noClassroomYet, minDate);
       buildTimeSelectForChosenDate(document.getElementById('pref1-time'), lastJugyoByDay, '');
       buildTimeSelectForChosenDate(document.getElementById('pref2-time'), lastJugyoByDay, '');
     }
@@ -385,9 +389,22 @@
       buildTimeSelectForChosenDate(document.getElementById('pref2-time'), lastJugyoByDay, this.value);
     });
 
+    // 住所欄のプレースホルダを選択教室の所在地に合わせる（未選択時はデフォルトに戻す）
+    const addressInput = document.getElementById('address');
+    const defaultAddressPlaceholder = addressInput.placeholder;
+    function updateAddressPlaceholder(classroom) {
+      const addr = window.classroomAddresses && window.classroomAddresses[classroom];
+      if (addr && (addr.pref || addr.address)) {
+        addressInput.placeholder = `例：${addr.pref}${addr.address}1-2-3`;
+      } else {
+        addressInput.placeholder = defaultAddressPlaceholder;
+      }
+    }
+
     // 希望教室 → 開講クラス一覧 ＋ 希望日時プルダウン
     document.getElementById('classroom').addEventListener('change', async function () {
       const classroom = this.value;
+      updateAddressPlaceholder(classroom);
       const section = document.getElementById('schedule-section');
       const spinner = document.getElementById('schedule-spinner');
       const list = document.getElementById('schedule-list');
