@@ -417,18 +417,6 @@
     }
 
 
-    // ── 組織コード（ORG_CODE）は franchise.js がフォルダ名から決定する ─────────
-    // ページ読み込み時：この加盟店（組織）の教室を教室マスタから動的取得
-    loadClassroomsInto('classroom');
-
-    // ── Toggle 級・段 field ──────────────────────────────────────────────────
-    document.querySelectorAll('input[name="experience"]').forEach(radio => {
-      radio.addEventListener('change', () => {
-        const levelField = document.getElementById('level-field');
-        levelField.classList.toggle('hidden', radio.value !== 'あり' || !radio.checked);
-      });
-    });
-
     // 住所欄のプレースホルダを選択教室の所在地に合わせる（未選択時はデフォルトに戻す）
     const addressInput = document.getElementById('address');
     const defaultAddressPlaceholder = addressInput.placeholder;
@@ -440,6 +428,22 @@
         addressInput.placeholder = defaultAddressPlaceholder;
       }
     }
+
+    // ── 組織コード（ORG_CODE）は franchise.js がフォルダ名から決定する ─────────
+    // ページ読み込み時：この加盟店（組織）の教室を教室マスタから動的取得
+    // 住所欄が教室選択より上にあるため、選択を待たず代表教室（1件目）の住所を先に表示する
+    loadClassroomsInto('classroom').then(() => {
+      const firstOption = document.getElementById('classroom').options[1];
+      if (firstOption) updateAddressPlaceholder(firstOption.textContent);
+    });
+
+    // ── Toggle 級・段 field ──────────────────────────────────────────────────
+    document.querySelectorAll('input[name="experience"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        const levelField = document.getElementById('level-field');
+        levelField.classList.toggle('hidden', radio.value !== 'あり' || !radio.checked);
+      });
+    });
 
     // ── 希望教室 → fetch jugyo list (チェックボックス形式) ───────────────────
     document.getElementById('classroom').addEventListener('change', async function () {
