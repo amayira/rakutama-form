@@ -21,6 +21,14 @@
       const slug = segs[0] || '';
       const page = segs[1] || 'index.html';
 
+      // "/stoburi"（末尾スラッシュなし）のままだと、_template/ 内の相対リンク
+      // （href="taiken.html" 等）がルート直下（本部）に解決されてしまう。
+      // "/stoburi/" に正規化してから読み込む（相対パスの基準ディレクトリを合わせる）。
+      if (segs.length === 1 && !location.pathname.endsWith('/')) {
+        location.replace(location.pathname + '/' + location.search);
+        return;
+      }
+
       try {
         const res = await fetch(`${API_BASE}/api/franchises`);
         const data = await res.json();
