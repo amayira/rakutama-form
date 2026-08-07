@@ -1,5 +1,11 @@
 // Cloudflare Worker - API Proxy for Rakutama Soroban School Forms
 // Bridges static GitHub Pages forms → kintone (cybozu.com)
+//
+// ⚠️ このファイルは本番デプロイ元ではない（参照用の古いコピー）。
+//    本番 Worker「rakutama-kintone」のソースは ~/dev/rakutama-lp-tokyo/form/worker.js
+//    （wrangler.jsonc があるのはそちら）。このファイルは 2026-08-07 時点で
+//    振替14:30締切・振替期日のサーバー側再計算・組織別メールプロファイル等が未反映。
+//    ここから wrangler deploy すると機能が巻き戻るので絶対にやらないこと。
 
 const KINTONE_BASE = "https://o81m0gfyv532.cybozu.com";
 
