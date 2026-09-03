@@ -1245,11 +1245,11 @@ const BREAKEVEN_TOTAL = 30; // 全社黒字化ライン（生徒数）
 /**
  * GET /api/staff/stats
  * Returns KPI stats:
- *   - seito_count: { total, 早宮校, 氷川台校, 中村校 }
+ *   - seito_count: { total, 早宮校, 氷川台校, 中村校, 平和台校 }
  *   - monthly: [ { month: "2026-06", 全体: {taiken, nyukai}, 早宮校: {...}, ... } ]
  */
 async function handleStaffStats(env) {
-  const SCHOOLS = ["早宮校", "氷川台校", "中村校"];
+  const SCHOOLS = ["早宮校", "氷川台校", "中村校", "平和台校"];
 
   // 体験参加名簿（過去・当日のみ）。欠席除外はJS側で処理
   const taikenQuery = `所属組織 in ("アルファーブレイン") and 体験参加日 <= TODAY() order by 体験参加日 asc limit 500`;
