@@ -290,10 +290,10 @@
     function parseJugyoClassesToSchedule(classList) {
       const byDay = new Map();
       (classList || []).forEach(({ name }) => {
-        const m = String(name).match(/\(([月火水木金土日])\)(\d{1,2})時/);
+        const m = String(name).match(/\(([月火水木金土日])\)(\d{1,2})時(?:(\d{1,2})分)?/);
         if (!m) return;
         const day = JP_TO_DAY[m[1]];
-        const t = `${String(Number(m[2])).padStart(2, '0')}:00`;
+        const t = `${String(Number(m[2])).padStart(2, '0')}:${String(Number(m[3] || 0)).padStart(2, '0')}`;
         if (!byDay.has(day)) byDay.set(day, new Set());
         byDay.get(day).add(t);
       });
