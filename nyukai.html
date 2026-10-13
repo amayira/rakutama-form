@@ -713,9 +713,7 @@
           throw new Error(resData.error || `送信に失敗しました（${response.status}）`);
         }
 
-        document.getElementById('form-card').classList.add('hidden');
-        document.getElementById('success-screen').classList.remove('hidden');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.location.href = 'nyukai-thanks.html';
 
       } catch (err) {
         errorBox.textContent = err.message || '送信中にエラーが発生しました。しばらく経ってから再度お試しください。';

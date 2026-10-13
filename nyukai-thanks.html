@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="https://rakutama-tokyo.com/Pictures/favicon.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>入会のお申し込みありがとうございます | 楽珠そろばん教室</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Noto Sans JP', 'sans-serif'],
+            display: ['Zen Kaku Gothic New', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body { font-family: 'Noto Sans JP', sans-serif; background-color: #F7FBFA; }
+    .font-display { font-family: 'Zen Kaku Gothic New', sans-serif; }
+  </style>
+</head>
+<body class="min-h-screen bg-[#F7FBFA]">
+
+  <header class="sticky top-0 z-50 bg-white shadow-sm">
+    <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+      <img src="https://rakutama-tokyo.com/Pictures/title.png" alt="楽珠そろばん教室" class="h-10 object-contain" />
+      <span class="hidden md:block text-sm font-medium text-gray-600">楽珠そろばん教室 各種申込フォーム</span>
+    </div>
+  </header>
+
+  <main class="max-w-2xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-2xl shadow-md p-8 text-center">
+      <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+        <i class="fa-solid fa-check text-green-500 text-2xl"></i>
+      </div>
+      <h1 class="text-xl font-black text-gray-800 font-display mb-3">送信が完了しました</h1>
+      <p class="text-sm text-gray-500 mb-6">入会のお申し込みを受け付けました。担当者よりご連絡いたします。</p>
+
+      <!-- LINE本登録案内 -->
+      <div class="bg-green-50 border border-green-200 rounded-xl p-5 mb-6 text-left">
+        <p class="text-sm font-black text-gray-800 font-display mb-3">■ 公式LINEへの本登録をお済みでない方へ</p>
+        <p class="text-sm text-gray-600 mb-3">下記より本登録をお願いいたします。</p>
+        <a href="https://lin.ee/sFZc9uM" target="_blank" rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 bg-[#06C755] hover:bg-[#05a847] text-white font-black text-sm py-2.5 px-6 rounded-full shadow-md transition font-display mb-4">
+          <i class="fa-brands fa-line text-base"></i>
+          公式LINEを登録する
+        </a>
+        <p class="text-sm text-gray-600 mb-1">登録後、以下の情報をトークにてお送りください。</p>
+        <ul class="text-sm text-gray-700 space-y-1 mt-2">
+          <li>1️⃣ 教室名：</li>
+          <li>2️⃣ お子様のお名前：</li>
+        </ul>
+        <p class="text-xs text-gray-400 mt-3">ご不明な点がございましたら、お気軽にお問い合わせください。<br>今後ともよろしくお願いいたします。</p>
+      </div>
+
+      <a href="index.html"
+        class="inline-block bg-green-500 hover:bg-green-600 text-white font-black text-sm py-2.5 px-8 rounded-full shadow-md transition font-display">
+        トップに戻る
+      </a>
+    </div>
+  </main>
+
+  <footer class="text-center py-8 text-xs text-gray-400">
+    <p>&copy; 姫路楽珠そろばん教室 All Rights Reserved.</p>
+  </footer>
+</body>
+</html>
