@@ -279,8 +279,7 @@
       const 項目名 = checkedItems.map(cb => cb.value).join('、');
       const kenteiChecked = checkedItems.some(cb => cb.value === '検定受験');
       const 金額 = kenteiChecked ? "" : checkedItems.reduce((sum, cb) => sum + parseInt(cb.dataset.price || '0', 10), 0);
-      const today = new Date();
-      const 請求基準日 = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const ありなし = (id) => document.getElementById(id).checked ? 'あり' : 'なし';
 
       const submitBtn = document.getElementById('submit-btn');
       const submitText = document.getElementById('submit-text');
@@ -295,7 +294,9 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             生徒番号: studentNumber,
-            請求基準日,
+            検定受験: ありなし('item-kentei'),
+            練習ソフト購入_365日: ありなし('item-365'),
+            練習ソフト購入_30日: ありなし('item-30'),
             項目名,
             金額,
           }),

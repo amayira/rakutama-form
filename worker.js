@@ -20,6 +20,7 @@ const APP = {
   CLASS_CHANGE: 18, // クラス変更
   SEITO_NEW: 19,   // 生徒名簿（新・統合）
   SONOTA: 16,      // その他請求
+  FLASH: 21,       // フラッシュ暗算申込（専用アプリ）
   KYOSHITSU: 5,    // 教室マスタ
   FC_LEAD: 20,     // FC説明会リード（加盟店募集サイト）
 };
@@ -608,20 +609,38 @@ async function handleKesseki(body, env) {
 }
 
 /**
+ * フラッシュ暗算の請求基準日（日本時間）
+ * 10日まで → 送信日 / 11日以降 → 翌月1日
+ */
+function flashBillingBaseDate(now = new Date()) {
+  const [y, m, d] = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now).split("-").map(Number);
+  const pad = (n) => String(n).padStart(2, "0");
+  if (d <= 10) return `${y}-${pad(m)}-${pad(d)}`;
+  return m === 12 ? `${y + 1}-01-01` : `${y}-${pad(m + 1)}-01`;
+}
+
+/**
  * POST /api/flash-anzan
- * Creates a record in その他請求 (App 16).
+ * Creates a record in フラッシュ暗算申込 (App 21).
  */
 async function handleFlashAnzan(body, env) {
+  const ariNashi = (v) => (v === "あり" ? "あり" : "なし");
   const record = buildRecord({
-    フォーム: "フラッシュ暗算申込フォーム",
     生徒番号: body["生徒番号"] ?? "",
-    請求基準日: body["請求基準日"] ?? "",
-    項目名: body["項目名"] ?? "",
-    金額: body["金額"] ?? 0,
+    請求基準日: flashBillingBaseDate(),
+    検定受験: ariNashi(body["検定受験"]),
+    練習ソフト購入_365日: ariNashi(body["練習ソフト購入_365日"]),
+    練習ソフト購入_30日: ariNashi(body["練習ソフト購入_30日"]),
   });
 
-  const sonotaToken = [env.TOKEN_SONOTA, env.TOKEN_SEITO_NEW].filter(Boolean).join(",");
-  await kintonePost(APP.SONOTA, record, sonotaToken);
+  // 生徒番号はルックアップ型のため TOKEN_SEITO_NEW も併せて渡す
+  const flashToken = [env.TOKEN_FLASH, env.TOKEN_SEITO_NEW].filter(Boolean).join(",");
+  await kintonePost(APP.FLASH, record, flashToken);
 
   await sendStudentReceipt({
     studentNumber: body["生徒番号"],
