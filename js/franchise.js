@@ -35,6 +35,15 @@ const ORG_CODE = (() => {
   return PATH_ORG_MAP[seg] || '本部';
 })();
 
+// 加盟店ごとのフォーム個別設定（スラッグ＝URL先頭のフォルダ名 → 設定）。
+//   telRequired: 体験フォームの電話番号を必須にする
+const FRANCHISE_FORM_SETTINGS = {
+  chidoribashi: { telRequired: true }, // 此花（丸子さん）2026-11-02依頼
+};
+const FORM_SETTINGS = FRANCHISE_FORM_SETTINGS[
+  FRANCHISE_OVERRIDE ? FRANCHISE_OVERRIDE.slug : (location.pathname.split('/').filter(Boolean)[0] || '')
+] || {};
+
 // _template/ 経由（404.html動的解決）の場合、フッターの運営会社名プレースホルダに差し込む
 if (FRANCHISE_OVERRIDE) {
   const operatorEl = document.getElementById('operator-name');

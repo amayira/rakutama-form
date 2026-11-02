@@ -149,7 +149,7 @@
 
           <!-- 電話番号 -->
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">電話番号 <span class="text-gray-400 text-xs font-normal">任意</span></label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">電話番号 <span id="tel-badge" class="text-gray-400 text-xs font-normal">任意</span></label>
             <input type="tel" id="tel" placeholder="例：090-1234-5678"
               class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400" />
           </div>
@@ -273,9 +273,17 @@
   </footer>
 
   <!-- 加盟店共通ロジック（API_BASE / ORG_CODE / loadClassroomsInto）。インライン処理より前に読み込む -->
-  <script src="/js/franchise.js?v=2"></script>
+  <script src="/js/franchise.js?v=3"></script>
   <script>
     // API_BASE は franchise.js で定義済み（ここでは再定義しない）
+
+    // 加盟店個別設定：電話番号必須（FORM_SETTINGS は franchise.js で定義）
+    if (FORM_SETTINGS.telRequired) {
+      const badge = document.getElementById('tel-badge');
+      badge.textContent = '*';
+      badge.className = 'text-red-500';
+      document.getElementById('tel').required = true;
+    }
 
     const FALLBACK_JUGYO_BY_CLASSROOM = {};
 
@@ -492,6 +500,7 @@
       if (!familyName) errors.push('姓をご入力ください');
       if (!givenName) errors.push('名をご入力ください');
       if (!email) errors.push('メールアドレスをご入力ください');
+      if (FORM_SETTINGS.telRequired && !tel) errors.push('電話番号をご入力ください');
       if (!classroom) errors.push('希望教室を選択してください');
       if (!pref1d || !pref1t) errors.push('第1希望の日付・時間を選択してください');
       if (!pref2d || !pref2t) errors.push('第2希望の日付・時間を選択してください');
