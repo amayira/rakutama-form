@@ -9,6 +9,7 @@
 - 加盟店ごとにフォルダを切る（`/koyomi`＝KOYOMI、`/moderato`＝株式会社モデラート）。ルート直下のフォームは東京直営用の旧配置。
 - 組織判定はURLのフォルダ名で行う：`js/franchise.js` の `PATH_ORG_MAP`（フォルダ名→kintone組織コード）。
 - 加盟店フォームは**新規向けのみ**（`taiken.html`・`nyukai.html`・`index.html` の3枚）。在学生向けフォームは置かない。
+- 加盟店ごとのフォーム個別設定（例：体験フォームの電話番号必須）は `js/franchise.js` の `FRANCHISE_FORM_SETTINGS` にスラッグ単位で書く。現状は `_template/taiken.html` のみ対応（此花=chidoribashi が電話必須）。
 - API は Cloudflare Workers（`https://rakutama-kintone.k-ariyama.workers.dev`）経由で kintone に読み書きする。
 
 ## ⚠️ worker.js について
